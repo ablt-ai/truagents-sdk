@@ -20,7 +20,16 @@ import httpx
 
 
 class TruAgentsError(Exception):
-    """Base class for all SDK errors."""
+    """Base class for all SDK errors.
+
+    Subclasses that add typed constructor arguments beyond the base class
+    must override `__reduce__` so `pickle.dumps` -> `pickle.loads` reconstructs
+    via those arguments. Without `__reduce__`, `Exception.args` carries only
+    the formatted message and unpickling calls the subclass with a single
+    positional string, dropping the typed fields (or raising `TypeError` for
+    multi-arg constructors). See `AuthError.__reduce__`, `APIError.__reduce__`,
+    `RateLimited.__reduce__`, and `NetworkError.__reduce__` for the pattern.
+    """
 
     code: str = "TRUAGENTS_ERROR"
 
@@ -93,6 +102,14 @@ class ServerError(APIError):
 
 
 class NetworkError(TruAgentsError):
+    """Raised when the transport layer fails to complete a request.
+
+    `cause` carries the underlying `httpx` transport exception. That exception
+    may reference the originating request including its POST body (which for
+    the token endpoint contains `client_secret`). See `SECURITY.md` §
+    "Serialization of exceptions" before serializing a `NetworkError`.
+    """
+
     code = "NETWORK_ERROR"
 
     def __init__(self, cause: Exception) -> None:

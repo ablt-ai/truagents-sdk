@@ -36,6 +36,18 @@ We follow a **90-day coordinated disclosure timeline**:
 5. If we cannot fix within 90 days, we work with you on a mutually acceptable
    extension.
 
+## Serialization of exceptions
+
+`NetworkError.cause` carries the underlying `httpx` transport exception. `httpx` binds the originating request — including POST body — to `TransportError` instances at raise time. For the OAuth token endpoint, that POST body contains `client_secret` as a form field.
+
+Do not serialize `NetworkError` to untrusted storage without scrubbing `cause.request.content` first. In particular:
+
+- Avoid `pickle.dumps(err)` on caught `NetworkError` if the resulting bytes flow to logs, on-disk caches, message queues, or any storage that receives unrelated data.
+- If you need to persist error context, extract the fields you actually need (`err.code`, `type(err.cause).__name__`, `str(err.cause)`) rather than the exception itself.
+- The SDK never pickles exceptions internally; this concern only applies to partner code that catches SDK errors and serializes them.
+
+The same guidance applies to `copy.deepcopy` chains that pass through unrelated storage.
+
 ## Scope
 
 In scope:
