@@ -13,13 +13,7 @@ from truagents.observability import Hooks, Request
 
 def test_five_step_positive_flow(client_id: str, client_secret: str, base_url: str) -> None:
     token_posts: list[Request] = []
-    hooks = Hooks(
-        on_request=lambda req: (
-            token_posts.append(req)
-            if req.url.endswith("/oauth/token")
-            else None
-        )
-    )
+    hooks = Hooks(on_request=lambda req: token_posts.append(req) if req.url.endswith("/oauth/token") else None)
 
     with Client(
         client_id=client_id,
@@ -38,6 +32,4 @@ def test_five_step_positive_flow(client_id: str, client_secret: str, base_url: s
         assert second is not None
         assert isinstance(second.data, list)
 
-    assert len(token_posts) >= 2, (
-        f"expected at least 2 /oauth/token POSTs (mint + refresh), got {len(token_posts)}"
-    )
+    assert len(token_posts) >= 2, f"expected at least 2 /oauth/token POSTs (mint + refresh), got {len(token_posts)}"

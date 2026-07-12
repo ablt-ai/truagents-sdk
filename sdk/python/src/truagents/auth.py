@@ -118,9 +118,7 @@ class TokenManager:
                 cached = self._peek_valid_access_token()
                 if cached is not None:
                     return cached
-                refresh_token = (
-                    self._state.refresh_token if self._state is not None else None
-                )
+                refresh_token = self._state.refresh_token if self._state is not None else None
             if refresh_token is not None:
                 try:
                     state = await self._issue_refresh_async(refresh_token)

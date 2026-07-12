@@ -34,9 +34,7 @@ class AuthError(TruAgentsError):
         self.http_status = http_status
         self.error = error
         self.error_description = error_description
-        super().__init__(
-            f"HTTP {http_status} error={error} error_description={error_description}"
-        )
+        super().__init__(f"HTTP {http_status} error={error} error_description={error_description}")
 
 
 class InvalidClient(AuthError):
@@ -143,9 +141,7 @@ def _extract_oauth_error_fields(response: httpx.Response) -> tuple[str, str]:
     )
 
 
-def classify_http_error(
-    response: httpx.Response, kind: Literal["oauth", "api"]
-) -> TruAgentsError:
+def classify_http_error(response: httpx.Response, kind: Literal["oauth", "api"]) -> TruAgentsError:
     """Map an HTTP response to the appropriate SDK exception subclass."""
     status = response.status_code
     if kind == "oauth":

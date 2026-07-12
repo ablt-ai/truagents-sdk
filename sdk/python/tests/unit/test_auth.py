@@ -35,9 +35,7 @@ def _make_manager(**overrides) -> TokenManager:
 class TestSyncPositivePath:
     @respx.mock
     def test_fresh_mint_uses_client_credentials(self):
-        route = respx.post(f"{BASE_URL}/oauth/token").mock(
-            return_value=httpx.Response(200, json=_token_body("A1"))
-        )
+        route = respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("A1")))
         mgr = _make_manager()
         assert mgr.get_access_token() == "A1"
         assert route.called
@@ -48,9 +46,7 @@ class TestSyncPositivePath:
 
     @respx.mock
     def test_cache_hit_avoids_second_post(self):
-        route = respx.post(f"{BASE_URL}/oauth/token").mock(
-            return_value=httpx.Response(200, json=_token_body("A1"))
-        )
+        route = respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("A1")))
         mgr = _make_manager()
         assert mgr.get_access_token() == "A1"
         assert mgr.get_access_token() == "A1"
@@ -147,9 +143,7 @@ class TestSyncFailures:
 class TestSyncConcurrency:
     @respx.mock
     def test_ten_threads_produce_one_token_post(self):
-        route = respx.post(f"{BASE_URL}/oauth/token").mock(
-            return_value=httpx.Response(200, json=_token_body("A1"))
-        )
+        route = respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("A1")))
         mgr = _make_manager()
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
             results = list(pool.map(lambda _: mgr.get_access_token(), range(10)))
@@ -161,9 +155,7 @@ class TestSyncConcurrency:
 class TestAsyncPositivePath:
     @respx.mock
     async def test_fresh_mint_uses_client_credentials(self):
-        route = respx.post(f"{BASE_URL}/oauth/token").mock(
-            return_value=httpx.Response(200, json=_token_body("A1"))
-        )
+        route = respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("A1")))
         mgr = _make_manager()
         assert await mgr.get_access_token_async() == "A1"
         assert route.called
@@ -171,9 +163,7 @@ class TestAsyncPositivePath:
 
     @respx.mock
     async def test_cache_hit_avoids_second_post(self):
-        route = respx.post(f"{BASE_URL}/oauth/token").mock(
-            return_value=httpx.Response(200, json=_token_body("A1"))
-        )
+        route = respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("A1")))
         mgr = _make_manager()
         await mgr.get_access_token_async()
         await mgr.get_access_token_async()
@@ -221,9 +211,7 @@ class TestAsyncFamilyRevoke:
 class TestAsyncConcurrency:
     @respx.mock
     async def test_ten_coroutines_produce_one_token_post(self):
-        route = respx.post(f"{BASE_URL}/oauth/token").mock(
-            return_value=httpx.Response(200, json=_token_body("A1"))
-        )
+        route = respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("A1")))
         mgr = _make_manager()
         results = await asyncio.gather(*[mgr.get_access_token_async() for _ in range(10)])
         assert results == ["A1"] * 10
@@ -234,9 +222,7 @@ class TestAsyncConcurrency:
 class TestHooksInvocation:
     @respx.mock
     def test_on_request_and_on_response_fire_around_token_post(self):
-        respx.post(f"{BASE_URL}/oauth/token").mock(
-            return_value=httpx.Response(200, json=_token_body("A1"))
-        )
+        respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("A1")))
         requests: list[Request] = []
         responses: list[tuple[Response, float]] = []
         hooks = Hooks(

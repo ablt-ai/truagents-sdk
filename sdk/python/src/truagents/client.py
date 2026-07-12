@@ -3,8 +3,9 @@
 Wrap `truagents.generated.AuthenticatedClient` and add:
 
 - Auto-refreshing bearer-token injection via `TokenManager`.
-- Retry with exponential backoff for `NetworkError` / `ServerError` and
-  `Retry-After`-honouring retry once for `RateLimited`.
+- Retries for `NetworkError`, `ServerError`, and `RateLimited` following
+  `RetryPolicy` (exponential backoff for transport-level failures;
+  `Retry-After`-honouring, `retry_after_cap`-bounded delay for 429).
 - A `User-Agent` header of the form `TruAgents-Python-SDK/{version}`.
 - Observability hooks fired around every API request.
 - Typed `truagents.errors.*` exceptions on non-2xx responses.
@@ -140,9 +141,7 @@ class Client(_ClientBase):
             lambda client: list_email_unsubscribes.sync_detailed(client=client, **params),
         )
 
-    def push_email_unsubscribes(
-        self, batch: EmailUnsubscribeBatchRequest
-    ) -> EmailUnsubscribeBatchResponse:
+    def push_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
         return self._call_resource_sync(
             "push_email_unsubscribes",
             lambda client: push_email_unsubscribes.sync_detailed(client=client, body=batch),
@@ -154,9 +153,7 @@ class Client(_ClientBase):
             lambda client: list_sms_unsubscribes.sync_detailed(client=client, **params),
         )
 
-    def push_sms_unsubscribes(
-        self, batch: PhoneUnsubscribeBatchRequest
-    ) -> PhoneUnsubscribeBatchResponse:
+    def push_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return self._call_resource_sync(
             "push_sms_unsubscribes",
             lambda client: push_sms_unsubscribes.sync_detailed(client=client, body=batch),
@@ -168,9 +165,7 @@ class Client(_ClientBase):
             lambda client: list_phone_unsubscribes.sync_detailed(client=client, **params),
         )
 
-    def push_voice_unsubscribes(
-        self, batch: PhoneUnsubscribeBatchRequest
-    ) -> PhoneUnsubscribeBatchResponse:
+    def push_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return self._call_resource_sync(
             "push_voice_unsubscribes",
             lambda client: push_phone_unsubscribes.sync_detailed(client=client, body=batch),
@@ -210,9 +205,7 @@ class Client(_ClientBase):
             self._emit_response(response, elapsed_ms)
             if 200 <= int(response.status_code) < 300:
                 return response.parsed
-            err = errors.classify_http_error(
-                self._to_httpx_response(response), "api"
-            )
+            err = errors.classify_http_error(self._to_httpx_response(response), "api")
             self._hooks.emit_error(err, snapshot)
             if not self._retry.should_retry(err, attempt):
                 raise err
@@ -234,9 +227,7 @@ class AsyncClient(_ClientBase):
             lambda client: list_email_unsubscribes.asyncio_detailed(client=client, **params),
         )
 
-    async def push_email_unsubscribes(
-        self, batch: EmailUnsubscribeBatchRequest
-    ) -> EmailUnsubscribeBatchResponse:
+    async def push_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
         return await self._call_resource_async(
             "push_email_unsubscribes",
             lambda client: push_email_unsubscribes.asyncio_detailed(client=client, body=batch),
@@ -248,9 +239,7 @@ class AsyncClient(_ClientBase):
             lambda client: list_sms_unsubscribes.asyncio_detailed(client=client, **params),
         )
 
-    async def push_sms_unsubscribes(
-        self, batch: PhoneUnsubscribeBatchRequest
-    ) -> PhoneUnsubscribeBatchResponse:
+    async def push_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return await self._call_resource_async(
             "push_sms_unsubscribes",
             lambda client: push_sms_unsubscribes.asyncio_detailed(client=client, body=batch),
@@ -262,9 +251,7 @@ class AsyncClient(_ClientBase):
             lambda client: list_phone_unsubscribes.asyncio_detailed(client=client, **params),
         )
 
-    async def push_voice_unsubscribes(
-        self, batch: PhoneUnsubscribeBatchRequest
-    ) -> PhoneUnsubscribeBatchResponse:
+    async def push_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return await self._call_resource_async(
             "push_voice_unsubscribes",
             lambda client: push_phone_unsubscribes.asyncio_detailed(client=client, body=batch),
@@ -304,9 +291,7 @@ class AsyncClient(_ClientBase):
             self._emit_response(response, elapsed_ms)
             if 200 <= int(response.status_code) < 300:
                 return response.parsed
-            err = errors.classify_http_error(
-                self._to_httpx_response(response), "api"
-            )
+            err = errors.classify_http_error(self._to_httpx_response(response), "api")
             self._hooks.emit_error(err, snapshot)
             if not self._retry.should_retry(err, attempt):
                 raise err
