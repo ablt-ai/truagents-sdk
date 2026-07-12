@@ -7,13 +7,14 @@ caller never blocks on a synchronous token round-trip inside the API request.
 
 Concurrency:
 
-- `_thread_lock` (`threading.Lock`) guards every read/write to `_state`.
-- `_async_lock` (`asyncio.Lock`) serialises concurrent coroutines so a
-  thundering herd of awaited `get_access_token_async` calls issues one
-  network round-trip, not N.
-- The `_thread_lock` critical section never contains an `await` — network I/O
-  happens with both locks released, then the state swap re-acquires only the
-  thread lock briefly.
+- Sync path (`get_access_token`): `_thread_lock` is held for the entire mint
+  sequence including the blocking network POST. Cold-start callers all block
+  on lock acquisition; the first caller mints, subsequent callers observe the
+  fresh cache and return without a redundant round-trip.
+- Async path (`get_access_token_async`): `_async_lock` is held end-to-end
+  including the `await`, so concurrent coroutines collapse to a single mint.
+  `_thread_lock` is only taken briefly for the initial cache read and the
+  final state swap — no `await` inside a `_thread_lock` critical section.
 
 Recovery from family-revoke (RFC 6749 §5.2 `invalid_grant`) is automatic: if a
 cached refresh token is rejected, the manager drops it and mints a fresh
@@ -50,7 +51,6 @@ class _TokenState:
     access_token: str
     refresh_token: str | None
     expires_at: float
-    mint_kind: str
 
 
 class TokenManager:
@@ -154,12 +154,7 @@ class TokenManager:
         with self._thread_lock:
             if self._state is None:
                 return
-            self._state = _TokenState(
-                access_token=self._state.access_token,
-                refresh_token=self._state.refresh_token,
-                expires_at=0.0,
-                mint_kind=self._state.mint_kind,
-            )
+            self._state.expires_at = 0.0
 
     def _peek_valid_access_token(self) -> str | None:
         """Read cached access token if still fresh. Caller holds `_thread_lock`."""
@@ -182,10 +177,9 @@ class TokenManager:
 
     def _build_form(self, kind: str, *, refresh_token: str | None = None) -> dict[str, str]:
         if kind == _MINT_REFRESH_TOKEN:
-            assert refresh_token is not None
             return {
                 "grant_type": _MINT_REFRESH_TOKEN,
-                "refresh_token": refresh_token,
+                "refresh_token": refresh_token or "",
             }
         return {
             "grant_type": _MINT_CLIENT_CREDENTIALS,
@@ -195,21 +189,21 @@ class TokenManager:
 
     def _issue_client_credentials(self) -> _TokenState:
         body = self._post_token(self._build_form(_MINT_CLIENT_CREDENTIALS))
-        return self._state_from_body(body, _MINT_CLIENT_CREDENTIALS)
+        return self._state_from_body(body)
 
     def _issue_refresh(self, refresh_token: str) -> _TokenState:
         body = self._post_token(self._build_form(_MINT_REFRESH_TOKEN, refresh_token=refresh_token))
-        return self._state_from_body(body, _MINT_REFRESH_TOKEN)
+        return self._state_from_body(body)
 
     async def _issue_client_credentials_async(self) -> _TokenState:
         body = await self._post_token_async(self._build_form(_MINT_CLIENT_CREDENTIALS))
-        return self._state_from_body(body, _MINT_CLIENT_CREDENTIALS)
+        return self._state_from_body(body)
 
     async def _issue_refresh_async(self, refresh_token: str) -> _TokenState:
         body = await self._post_token_async(
             self._build_form(_MINT_REFRESH_TOKEN, refresh_token=refresh_token),
         )
-        return self._state_from_body(body, _MINT_REFRESH_TOKEN)
+        return self._state_from_body(body)
 
     def _post_token(self, form: dict[str, str]) -> dict:
         client = self._get_or_create_sync_client()
@@ -272,7 +266,7 @@ class TokenManager:
             raise err
         return body
 
-    def _state_from_body(self, body: dict, mint_kind: str) -> _TokenState:
+    def _state_from_body(self, body: dict) -> _TokenState:
         access_token = self._require_field(body, "access_token")
         expires_in = self._require_field(body, "expires_in")
         try:
@@ -288,7 +282,6 @@ class TokenManager:
             access_token=access_token,
             refresh_token=refresh_token,
             expires_at=time.time() + expires_in_seconds,
-            mint_kind=mint_kind,
         )
 
     @staticmethod
