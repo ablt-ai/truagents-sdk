@@ -46,17 +46,13 @@ def main() -> int:
     client_id, client_secret, base_url = read_env()
     print(f"Step 1: env resolved — CLIENT_ID={_prefix(client_id)} BASE_URL={base_url}")
 
-    with Client(
-        client_id=client_id, client_secret=client_secret, base_url=base_url
-    ) as client:
+    with Client(client_id=client_id, client_secret=client_secret, base_url=base_url) as client:
         try:
             step2_token = client._token_manager.get_access_token()
             print(f"Step 2: mint OK — access_token={_prefix(step2_token)}")
 
             step3 = client.list_email_unsubscribes()
-            print(
-                f"Step 3: GET /api/v1/unsubscribe/email OK — items_count={len(step3.data)}"
-            )
+            print(f"Step 3: GET /api/v1/unsubscribe/email OK — items_count={len(step3.data)}")
 
             # test/demo escape hatch — not part of public SDK API; do not copy into production
             client._token_manager._expire_now()
@@ -64,9 +60,7 @@ def main() -> int:
             print(f"Step 4: refresh rotation OK — new_token={_prefix(step4_token)}")
 
             step5 = client.list_email_unsubscribes()
-            print(
-                f"Step 5: GET with rotated token OK — items_count={len(step5.data)}"
-            )
+            print(f"Step 5: GET with rotated token OK — items_count={len(step5.data)}")
         except errors.TruAgentsError as err:
             print(f"Unexpected error: {err.code} {err}", file=sys.stderr)
             return 1

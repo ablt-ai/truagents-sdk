@@ -39,10 +39,10 @@ jobs:
           pip install -e '.[dev]'
       - name: Ruff
         working-directory: sdk/python
-        run: ruff check src tests
+        run: ruff check src tests examples
       - name: Ruff format check
         working-directory: sdk/python
-        run: ruff format --check src tests
+        run: ruff format --check src tests examples
       - name: Pyright
         working-directory: sdk/python
         run: pyright src
