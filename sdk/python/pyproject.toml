@@ -66,3 +66,4 @@ pythonVersion = "3.12"
 asyncio_mode = "auto"
 timeout = 300
 testpaths = ["tests"]
+addopts = "-vvv -rsfEx --tb=short"

@@ -31,6 +31,7 @@ def test_five_step_positive_flow(client_id: str, client_secret: str, base_url: s
         assert first is not None
         assert isinstance(first.data, list)
 
+        # test/demo escape hatch — not part of public SDK API; do not copy into production
         client._token_manager._expire_now()
 
         second = client.list_email_unsubscribes()

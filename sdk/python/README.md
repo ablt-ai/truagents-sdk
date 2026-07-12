@@ -90,8 +90,7 @@ client = Client(client_id="...", client_secret="...", retry=policy)
 Broken hooks never break an SDK call — they are logged and swallowed.
 
 ```python
-from truagents import Client, Hooks
-from truagents.observability import Request, Response
+from truagents import Client, Hooks, Request, Response
 
 
 def log_request(req: Request) -> None:

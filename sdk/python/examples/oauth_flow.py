@@ -58,6 +58,7 @@ def main() -> int:
                 f"Step 3: GET /api/v1/unsubscribe/email OK — items_count={len(step3.data)}"
             )
 
+            # test/demo escape hatch — not part of public SDK API; do not copy into production
             client._token_manager._expire_now()
             step4_token = client._token_manager.get_access_token()
             print(f"Step 4: refresh rotation OK — new_token={_prefix(step4_token)}")
