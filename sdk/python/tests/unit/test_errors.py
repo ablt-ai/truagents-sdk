@@ -47,6 +47,13 @@ class TestBaseAndInstantiation:
         assert err.retry_after == 1.5
         assert err.code == "RATE_LIMITED"
 
+    def test_rate_limited_str_includes_retry_after(self):
+        err = errors.RateLimited(429, "slow down", retry_after=45.0)
+        rendered = str(err)
+        assert "429" in rendered
+        assert "slow down" in rendered
+        assert "retry_after=45.0s" in rendered
+
     def test_not_found_invalid_request_server_error_codes(self):
         assert errors.NotFound(404, "").code == "NOT_FOUND"
         assert errors.InvalidRequest(400, "").code == "INVALID_REQUEST"
@@ -120,6 +127,18 @@ class TestClassifyAPI:
     def test_429_with_unparseable_retry_after_defaults_to_zero(self):
         resp = _response(429, text="slow", headers={"Retry-After": "not-a-number"})
         err = errors.classify_http_error(resp, "api")
+        assert err.retry_after == 0.0
+
+    def test_429_with_nan_retry_after_defaults_to_zero(self):
+        resp = _response(429, text="slow", headers={"Retry-After": "nan"})
+        err = errors.classify_http_error(resp, "api")
+        assert isinstance(err, errors.RateLimited)
+        assert err.retry_after == 0.0
+
+    def test_429_with_inf_retry_after_defaults_to_zero(self):
+        resp = _response(429, text="slow", headers={"Retry-After": "inf"})
+        err = errors.classify_http_error(resp, "api")
+        assert isinstance(err, errors.RateLimited)
         assert err.retry_after == 0.0
 
     def test_500_maps_to_server_error(self):

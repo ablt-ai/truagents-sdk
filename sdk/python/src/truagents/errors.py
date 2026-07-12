@@ -10,6 +10,7 @@ Two branches under a common `TruAgentsError` base:
 
 from __future__ import annotations
 
+import math
 import time
 from datetime import UTC
 from email.utils import parsedate_to_datetime
@@ -65,8 +66,13 @@ class RateLimited(APIError):
     code = "RATE_LIMITED"
 
     def __init__(self, http_status: int, body: str, retry_after: float) -> None:
-        super().__init__(http_status, body)
+        self.http_status = http_status
+        self.body = body
         self.retry_after = retry_after
+        Exception.__init__(
+            self,
+            f"HTTP {http_status} body={body} retry_after={retry_after}s",
+        )
 
 
 class NotFound(APIError):
@@ -90,13 +96,22 @@ class NetworkError(TruAgentsError):
 
 
 def _parse_retry_after(header_value: str | None) -> float:
-    """Parse the `Retry-After` header. Returns 0.0 when absent or unparseable."""
+    """Parse the `Retry-After` header. Returns 0.0 when absent or unparseable.
+
+    Guards against `nan` / `inf` — a malformed 429 with `Retry-After: nan`
+    would otherwise flow into `time.sleep(nan)` and raise `ValueError` from
+    inside the retry loop as an untyped exception.
+    """
     if not header_value:
         return 0.0
     try:
-        return float(header_value)
+        seconds = float(header_value)
     except ValueError:
         pass
+    else:
+        if not math.isfinite(seconds):
+            return 0.0
+        return seconds
     try:
         target = parsedate_to_datetime(header_value)
     except (TypeError, ValueError):
