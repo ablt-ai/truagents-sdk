@@ -261,6 +261,25 @@ class TestHooksInvocation:
         assert isinstance(seen[0][0], errors.NetworkError)
         mgr.close()
 
+    @respx.mock
+    def test_token_response_body_is_redacted_in_hooks(self):
+        respx.post(f"{BASE_URL}/oauth/token").mock(
+            return_value=httpx.Response(
+                200, json=_token_body("SUPER-SECRET-TOKEN", refresh_token="SUPER-SECRET-REFRESH")
+            )
+        )
+        responses: list[Response] = []
+        hooks = Hooks(on_response=lambda r, _elapsed: responses.append(r))
+        mgr = _make_manager(hooks=hooks)
+        mgr.get_access_token()
+        assert len(responses) == 1
+        body = responses[0].body
+        assert b"SUPER-SECRET-TOKEN" not in body
+        assert b"SUPER-SECRET-REFRESH" not in body
+        assert b"access_token" not in body
+        assert body == b"<redacted: token endpoint response>"
+        mgr.close()
+
 
 class TestExpireNowEscapeHatch:
     @respx.mock

@@ -19,6 +19,11 @@ Recovery from family-revoke (RFC 6749 §5.2 `invalid_grant`) is automatic: if a
 cached refresh token is rejected, the manager drops it and mints a fresh
 `client_credentials` grant transparently. Only the second attempt's outcome
 surfaces to the caller.
+
+Observability: the `/oauth/token` response body is never handed to
+`on_response` hooks verbatim — it is replaced with a static redaction sentinel
+so partner hooks logging `Response.body` cannot leak `access_token` /
+`refresh_token`. Status, headers, and timing still flow through unchanged.
 """
 
 from __future__ import annotations
@@ -37,6 +42,7 @@ DEFAULT_REFRESH_THRESHOLD_SECONDS = 60.0
 TOKEN_PATH = "/oauth/token"
 _MINT_CLIENT_CREDENTIALS = "client_credentials"
 _MINT_REFRESH_TOKEN = "refresh_token"
+_REDACTED_TOKEN_BODY = b"<redacted: token endpoint response>"
 
 
 @dataclass
@@ -244,7 +250,7 @@ class TokenManager:
             Response(
                 status_code=response.status_code,
                 headers=dict(response.headers),
-                body=response.content,
+                body=_REDACTED_TOKEN_BODY,
             ),
             elapsed_ms,
         )
