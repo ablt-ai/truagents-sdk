@@ -1,3 +1,4 @@
+import pickle
 from datetime import UTC
 
 import httpx
@@ -168,3 +169,55 @@ class TestRetryAfterHttpDate:
         err = errors.classify_http_error(resp, "api")
         assert isinstance(err, errors.RateLimited)
         assert err.retry_after > 0
+
+
+class TestPickleRoundTrip:
+    def test_auth_error_round_trips(self):
+        original = errors.AuthError(400, "invalid_client", "Client not found")
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.AuthError
+        assert restored.http_status == 400
+        assert restored.error == "invalid_client"
+        assert restored.error_description == "Client not found"
+        assert str(restored) == str(original)
+
+    def test_invalid_grant_round_trips(self):
+        original = errors.InvalidGrant(400, "invalid_grant", "Token expired")
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.InvalidGrant
+        assert restored.http_status == 400
+        assert restored.error == "invalid_grant"
+        assert restored.error_description == "Token expired"
+
+    def test_api_error_round_trips(self):
+        original = errors.APIError(500, "server exploded")
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.APIError
+        assert restored.http_status == 500
+        assert restored.body == "server exploded"
+
+    def test_rate_limited_round_trips(self):
+        original = errors.RateLimited(429, "slow down", 45.0)
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.RateLimited
+        assert restored.http_status == 429
+        assert restored.body == "slow down"
+        assert restored.retry_after == 45.0
+        assert str(restored) == str(original)
+
+    def test_network_error_round_trips(self):
+        original = errors.NetworkError(httpx.ConnectError("boom"))
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.NetworkError
+        assert isinstance(restored.cause, httpx.ConnectError)
+        assert str(restored.cause) == "boom"
+
+    def test_not_found_inherits_api_error_reduce(self):
+        original = errors.NotFound(404, "gone")
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.NotFound
+
+    def test_server_error_inherits_api_error_reduce(self):
+        original = errors.ServerError(500, "boom")
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.ServerError

@@ -14,7 +14,7 @@ import math
 import time
 from datetime import UTC
 from email.utils import parsedate_to_datetime
-from typing import Literal
+from typing import Any, Literal
 
 import httpx
 
@@ -35,6 +35,9 @@ class AuthError(TruAgentsError):
         self.error = error
         self.error_description = error_description
         super().__init__(f"HTTP {http_status} error={error} error_description={error_description}")
+
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
+        return (type(self), (self.http_status, self.error, self.error_description))
 
 
 class InvalidClient(AuthError):
@@ -59,18 +62,22 @@ class APIError(TruAgentsError):
         self.body = body
         super().__init__(f"HTTP {http_status} body={body}")
 
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
+        return (type(self), (self.http_status, self.body))
+
 
 class RateLimited(APIError):
     code = "RATE_LIMITED"
 
     def __init__(self, http_status: int, body: str, retry_after: float) -> None:
-        self.http_status = http_status
-        self.body = body
         self.retry_after = retry_after
-        Exception.__init__(
-            self,
-            f"HTTP {http_status} body={body} retry_after={retry_after}s",
-        )
+        super().__init__(http_status, body)
+
+    def __str__(self) -> str:
+        return f"HTTP {self.http_status} body={self.body} retry_after={self.retry_after}s"
+
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
+        return (type(self), (self.http_status, self.body, self.retry_after))
 
 
 class NotFound(APIError):
@@ -91,6 +98,9 @@ class NetworkError(TruAgentsError):
     def __init__(self, cause: Exception) -> None:
         self.cause = cause
         super().__init__(f"Network error: {cause}")
+
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
+        return (type(self), (self.cause,))
 
 
 def _parse_retry_after(header_value: str | None) -> float:
