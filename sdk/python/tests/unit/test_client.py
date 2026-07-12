@@ -9,7 +9,7 @@ import respx
 from truagents import errors
 from truagents.client import AsyncClient, Client
 from truagents.observability import Hooks, Request, Response
-from truagents.retry import RetryPolicy
+from truagents.retry import DEFAULT_RETRY_POLICY, RetryPolicy
 
 BASE_URL = "https://api.dev-truagents.com"
 
@@ -328,10 +328,11 @@ class TestTransportErrorRetry:
         respx.post(f"{BASE_URL}/oauth/token").mock(
             return_value=httpx.Response(200, json=_token_body())
         )
-        respx.get(f"{BASE_URL}/api/v1/unsubscribe/email").mock(
+        api = respx.get(f"{BASE_URL}/api/v1/unsubscribe/email").mock(
             side_effect=httpx.ConnectError("dns")
         )
         with patch("truagents.client.time.sleep"):
             with Client("cid", "sec", base_url=BASE_URL) as client:
                 with pytest.raises(errors.NetworkError):
                     client.list_email_unsubscribes()
+        assert api.call_count == DEFAULT_RETRY_POLICY.max_attempts

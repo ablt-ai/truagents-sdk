@@ -102,6 +102,34 @@ class _ClientBase:
     def user_agent(self) -> str:
         return USER_AGENT_TEMPLATE.format(version=__version__)
 
+    def _request_snapshot(self, method_name: str, token: str) -> Request:
+        return Request(
+            method=method_name,
+            url=self._base_url,
+            headers={
+                "User-Agent": self.user_agent,
+                _AUTH_HEADER: f"Bearer {token[:12]}..." if token else "Bearer <none>",
+            },
+            body=None,
+        )
+
+    def _emit_response(self, response: Any, elapsed_ms: float) -> None:
+        self._hooks.emit_response(
+            Response(
+                status_code=int(response.status_code),
+                headers=dict(response.headers),
+                body=response.content,
+            ),
+            elapsed_ms,
+        )
+
+    def _to_httpx_response(self, response: Any) -> httpx.Response:
+        return httpx.Response(
+            status_code=int(response.status_code),
+            headers=dict(response.headers),
+            content=response.content,
+        )
+
 
 class Client(_ClientBase):
     """Synchronous client for the TruAgents Unsubscribe API."""
@@ -196,34 +224,6 @@ class Client(_ClientBase):
         client.headers[_AUTH_HEADER] = header_value
         self._authenticated._headers[_AUTH_HEADER] = header_value
 
-    def _request_snapshot(self, method_name: str, token: str) -> Request:
-        return Request(
-            method=method_name,
-            url=self._base_url,
-            headers={
-                "User-Agent": self.user_agent,
-                _AUTH_HEADER: f"Bearer {token[:12]}..." if token else "Bearer <none>",
-            },
-            body=None,
-        )
-
-    def _emit_response(self, response: Any, elapsed_ms: float) -> None:
-        self._hooks.emit_response(
-            Response(
-                status_code=int(response.status_code),
-                headers=dict(response.headers),
-                body=response.content,
-            ),
-            elapsed_ms,
-        )
-
-    def _to_httpx_response(self, response: Any) -> httpx.Response:
-        return httpx.Response(
-            status_code=int(response.status_code),
-            headers=dict(response.headers),
-            content=response.content,
-        )
-
 
 class AsyncClient(_ClientBase):
     """Asynchronous client for the TruAgents Unsubscribe API."""
@@ -317,31 +317,3 @@ class AsyncClient(_ClientBase):
         client = self._authenticated.get_async_httpx_client()
         client.headers[_AUTH_HEADER] = header_value
         self._authenticated._headers[_AUTH_HEADER] = header_value
-
-    def _request_snapshot(self, method_name: str, token: str) -> Request:
-        return Request(
-            method=method_name,
-            url=self._base_url,
-            headers={
-                "User-Agent": self.user_agent,
-                _AUTH_HEADER: f"Bearer {token[:12]}..." if token else "Bearer <none>",
-            },
-            body=None,
-        )
-
-    def _emit_response(self, response: Any, elapsed_ms: float) -> None:
-        self._hooks.emit_response(
-            Response(
-                status_code=int(response.status_code),
-                headers=dict(response.headers),
-                body=response.content,
-            ),
-            elapsed_ms,
-        )
-
-    def _to_httpx_response(self, response: Any) -> httpx.Response:
-        return httpx.Response(
-            status_code=int(response.status_code),
-            headers=dict(response.headers),
-            content=response.content,
-        )
