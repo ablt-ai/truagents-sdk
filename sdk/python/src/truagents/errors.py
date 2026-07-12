@@ -10,6 +10,8 @@ Two branches under a common `TruAgentsError` base:
 
 from __future__ import annotations
 
+import time
+from datetime import UTC
 from email.utils import parsedate_to_datetime
 from typing import Literal
 
@@ -101,11 +103,8 @@ def _parse_retry_after(header_value: str | None) -> float:
         return 0.0
     if target is None:
         return 0.0
-    import time
-    from datetime import timezone
-
     now = time.time()
-    target_ts = target.astimezone(timezone.utc).timestamp()
+    target_ts = target.astimezone(UTC).timestamp()
     return max(target_ts - now, 0.0)
 
 

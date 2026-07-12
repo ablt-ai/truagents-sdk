@@ -90,5 +90,5 @@ def test_default_policy_uses_documented_values():
 
 
 def test_policy_is_frozen():
-    with pytest.raises(Exception):
+    with pytest.raises(AttributeError):
         DEFAULT_RETRY_POLICY.max_attempts = 5  # type: ignore[misc]

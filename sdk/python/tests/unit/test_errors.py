@@ -1,10 +1,17 @@
+from datetime import UTC
+
 import httpx
 import pytest
 
 from truagents import errors
 
 
-def _response(status_code: int, json_body: dict | None = None, text: str | None = None, headers: dict | None = None) -> httpx.Response:
+def _response(
+    status_code: int,
+    json_body: dict | None = None,
+    text: str | None = None,
+    headers: dict | None = None,
+) -> httpx.Response:
     if json_body is not None:
         return httpx.Response(status_code, json=json_body, headers=headers or {})
     return httpx.Response(status_code, text=text or "", headers=headers or {})
@@ -12,7 +19,7 @@ def _response(status_code: int, json_body: dict | None = None, text: str | None 
 
 class TestBaseAndInstantiation:
     def test_truagents_error_is_catchable_as_exception(self):
-        with pytest.raises(Exception):
+        with pytest.raises(errors.TruAgentsError):
             raise errors.TruAgentsError("boom")
 
     def test_auth_error_carries_fields(self):
@@ -133,10 +140,10 @@ class TestClassifyAPI:
 
 class TestRetryAfterHttpDate:
     def test_http_date_produces_positive_delay(self):
+        from datetime import datetime, timedelta
         from email.utils import format_datetime
-        from datetime import datetime, timedelta, timezone
 
-        future = datetime.now(timezone.utc) + timedelta(seconds=10)
+        future = datetime.now(UTC) + timedelta(seconds=10)
         header = format_datetime(future, usegmt=True)
         resp = _response(429, text="slow", headers={"Retry-After": header})
         err = errors.classify_http_error(resp, "api")
