@@ -4,7 +4,8 @@
 #           ./scripts/prepare-release.sh 0.2.0.rc1
 #           ./scripts/prepare-release.sh 0.2.0.dev0
 #
-# See docs/releasing.md for the full flow.
+# See docs/releasing.md for the full flow, including the requirement that
+# <version> must be strictly greater than the current __version__ on main.
 
 set -euo pipefail
 
@@ -62,6 +63,27 @@ fi
 
 if ! python -c "import build" 2>/dev/null; then
   die_validation "'python -m build' is not installed. Run: python -m pip install --upgrade build"
+fi
+
+if ! python -c "from packaging.version import Version" 2>/dev/null; then
+  die_validation "'packaging' is not installed. Run: python -m pip install --upgrade packaging"
+fi
+
+CURRENT_VERSION="$(grep -oE '"[^"]+"' "$VERSION_FILE" | head -n1 | tr -d '"')"
+if [[ -z "$CURRENT_VERSION" ]]; then
+  die_validation "could not read current version from $VERSION_FILE"
+fi
+
+if ! python -c "
+import sys
+from packaging.version import Version
+try:
+    sys.exit(0 if Version('$VERSION') > Version('$CURRENT_VERSION') else 1)
+except Exception as exc:
+    print(f'version comparison failed: {exc}', file=sys.stderr)
+    sys.exit(2)
+" 2>/dev/null; then
+  die_validation "version '$VERSION' is not greater than current '$CURRENT_VERSION' on main. Releases must be monotonically increasing per PEP 440."
 fi
 
 if ! command -v gh >/dev/null 2>&1; then
