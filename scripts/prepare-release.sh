@@ -39,6 +39,11 @@ if [[ ! "$VERSION" =~ $VERSION_REGEX ]]; then
   die_validation "version '$VERSION' does not match ${VERSION_REGEX}. Examples: 0.1.1, 0.2.0.rc1, 0.1.0.dev0, 0.1.0.post1."
 fi
 
+# Delegate version validation (PEP 440 format + monotonic increase against
+# sdk/python/src/truagents/__version__.py) to the standalone checker. The
+# checker prints its own diagnostics to stderr; do not swallow them.
+python3 "$REPO_ROOT/scripts/check_release_version.py" "$VERSION" || exit 2
+
 cd "$REPO_ROOT"
 
 CURRENT_BRANCH="$(git symbolic-ref --short HEAD 2>/dev/null)" \
