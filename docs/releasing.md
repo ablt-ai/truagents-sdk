@@ -20,8 +20,7 @@ Before starting a release, confirm:
 - Your working tree is clean and checked out on `main`.
 - Local `main` is up to date with `origin/main`.
 - The new `<version>` is strictly greater than the current value in
-  `sdk/python/src/truagents/__version__.py` per PEP 440 ordering — the prep
-  script rejects downgrades.
+  `sdk/python/src/truagents/__version__.py` per PEP 440 ordering.
 - The [`gh`](https://cli.github.com/) CLI is installed and authenticated
   (`gh auth status`).
 - `python -m build` and `packaging` are available locally

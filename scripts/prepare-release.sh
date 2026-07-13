@@ -86,8 +86,8 @@ try:
 except Exception as exc:
     print(f'version comparison failed: {exc}', file=sys.stderr)
     sys.exit(2)
-" 2>/dev/null; then
-  die_validation "version '$VERSION' is not greater than current '$CURRENT_VERSION' on main. Releases must be monotonically increasing per PEP 440."
+"; then
+  die_validation "version '$VERSION' is not greater than current '$CURRENT_VERSION' on main. Choose a version greater than '$CURRENT_VERSION'."
 fi
 
 if ! command -v gh >/dev/null 2>&1; then
