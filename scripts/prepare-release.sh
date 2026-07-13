@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# Prepare a Python SDK release: validate, bump __version__, open a release PR.
+# Usage: ./scripts/prepare-release.sh <version>
+# Examples: ./scripts/prepare-release.sh 0.2.0
+#           ./scripts/prepare-release.sh 0.2.0.rc1
+#           ./scripts/prepare-release.sh 0.2.0.dev0
 #
-# See docs/releasing.md for the full flow. Refs: B2B-2206.
+# See docs/releasing.md for the full flow.
 
 set -euo pipefail
 
@@ -111,7 +114,7 @@ git commit -m "chore(release): prepare v${VERSION}" -m "Bumps __version__ to ${V
 The tag-release workflow will auto-tag main on merge, firing
 release-python.yml to publish to PyPI.
 
-Refs: B2B-2206" || die_git "commit failed"
+See docs/releasing.md for the full flow." || die_git "commit failed"
 
 echo "prepare-release.sh: pushing ${RELEASE_BRANCH}..."
 git push -u origin "$RELEASE_BRANCH" || die_git "push failed"
@@ -137,8 +140,6 @@ workflow will:
 
 See [\`docs/releasing.md\`](../blob/main/docs/releasing.md) for the full flow
 and the manual-tag fallback.
-
-Refs: B2B-2206
 EOF
 )"
 
@@ -146,7 +147,7 @@ echo "prepare-release.sh: opening PR..."
 PR_URL="$(gh pr create \
   --base main \
   --head "$RELEASE_BRANCH" \
-  --title "chore(release): v${VERSION} (B2B-2206)" \
+  --title "chore(release): v${VERSION}" \
   --body "$PR_BODY")" || die_git "gh pr create failed"
 
 echo
