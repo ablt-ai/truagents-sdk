@@ -41,10 +41,10 @@ def read_current_version() -> str:
         )
     try:
         return ns["__version__"]
-    except KeyError:
+    except KeyError as exc:
         die(
             f"could not read __version__ from {VERSION_FILE}. "
-            f'Expected content shape: __version__ = "X.Y.Z". Cause: __version__ not defined.'
+            f'Expected content shape: __version__ = "X.Y.Z". Cause: {exc} not defined.'
         )
 
 
