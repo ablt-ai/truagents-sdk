@@ -6,8 +6,29 @@ on:
       - "sdk-python-v*"
 
 jobs:
+  verify-tag-on-main:
+    name: Verify tag on main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with full history
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Verify tag commit is reachable from main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} (commit ${GITHUB_SHA}) is not reachable from main. Release blocked."
+            echo "::error::Only tags placed on commits that are ancestors of origin/main can trigger releases."
+            exit 1
+          fi
+          echo "Tag ${GITHUB_REF_NAME} at ${GITHUB_SHA} confirmed reachable from origin/main."
+
   build:
     runs-on: ubuntu-latest
+    needs: verify-tag-on-main
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
