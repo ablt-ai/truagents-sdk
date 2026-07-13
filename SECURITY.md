@@ -36,7 +36,7 @@ We follow a **90-day coordinated disclosure timeline**:
 5. If we cannot fix within 90 days, we work with you on a mutually acceptable
    extension.
 
-## Serialization of exceptions
+## Serialization of Exceptions
 
 `NetworkError.cause` carries the underlying `httpx` transport exception. `httpx` binds the originating request — including POST body — to `TransportError` instances at raise time. For the OAuth token endpoint, that POST body contains `client_secret` as a form field.
 
