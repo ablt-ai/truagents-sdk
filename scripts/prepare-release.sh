@@ -69,9 +69,13 @@ if ! python -c "from packaging.version import Version" 2>/dev/null; then
   die_validation "'packaging' is not installed. Run: python -m pip install --upgrade packaging"
 fi
 
-CURRENT_VERSION="$(grep -oE '"[^"]+"' "$VERSION_FILE" | head -n1 | tr -d '"')"
+CURRENT_VERSION="$(python -c "
+import runpy
+ns = runpy.run_path('$VERSION_FILE')
+print(ns['__version__'])
+" 2>/dev/null)"
 if [[ -z "$CURRENT_VERSION" ]]; then
-  die_validation "could not read current version from $VERSION_FILE"
+  die_validation "could not read __version__ from $VERSION_FILE. Expected content shape: __version__ = \"X.Y.Z\""
 fi
 
 if ! python -c "
