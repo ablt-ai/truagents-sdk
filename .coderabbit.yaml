@@ -1,0 +1,33 @@
+language: en-US
+tone_instructions: "Be concise and direct. Focus on bugs, security issues, and logic errors. Skip style nits."
+
+reviews:
+  profile: chill
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+    - "WIP"
+    - "DO NOT MERGE"
+  path_filters:
+  # Codegen output — committed but not human-authored
+  - "!sdk/python/src/truagents/generated/**"
+  # Apache 2.0 verbatim
+  - "!LICENSE"
+  path_instructions:
+  - path: "sdk/python/src/**"
+    instructions: "Public Python SDK using httpx and hatchling. Check for OAuth token safety (no leakage via hooks or logs), async correctness (dual-lock TokenManager, sync vs async paths), a clean partner-facing API surface, and pickle round-trip preservation via __reduce__ on error subclasses. Do not review src/truagents/generated/."
+  - path: "sdk/python/tests/**"
+    instructions: "Unit tests use respx for httpx mocking and time-machine for the clock. Contract tests hit staging and skip cleanly without CLIENT_ID/CLIENT_SECRET repo secrets. Check behavior coverage, not implementation coupling. Do not flag tests that mock time or HTTP transport."
+  - path: ".github/workflows/**"
+    instructions: "GitHub Actions for a public-when-ready OSS Python SDK. Check for secret exposure in fork PRs (contract job has a same-repo guard), correct OIDC scoping on the release job (id-token: write only on the publish job), and pinning of third-party actions to commit SHAs."
+  - path: "codegen/**"
+    instructions: "Codegen entry point wraps openapi-python-client. Bash scripts must use `set -euo pipefail`. Pinned tool versions in codegen/requirements.txt."
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: local
