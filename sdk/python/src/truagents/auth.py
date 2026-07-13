@@ -173,11 +173,11 @@ class TokenManager:
             self._async_http_client = httpx.AsyncClient(timeout=self._timeout)
         return self._async_http_client
 
-    def _build_form(self, kind: str, *, refresh_token: str | None = None) -> dict[str, str]:
+    def _build_form(self, kind: str, *, refresh_token: str = "") -> dict[str, str]:
         if kind == _MINT_REFRESH_TOKEN:
             return {
                 "grant_type": _MINT_REFRESH_TOKEN,
-                "refresh_token": refresh_token or "",
+                "refresh_token": refresh_token,
             }
         return {
             "grant_type": _MINT_CLIENT_CREDENTIALS,
