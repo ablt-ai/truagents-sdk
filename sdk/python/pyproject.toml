@@ -33,7 +33,7 @@ dev = [
   "pytest-timeout>=2.3",
   "respx>=0.22",
   "time-machine>=2.16",
-  "ruff==0.15.18",
+  "ruff==0.15.21",
   "pyright>=1.1.400",
 ]
 
