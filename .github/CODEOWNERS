@@ -1,0 +1,14 @@
+# Global default owner.
+* @aimestereo
+
+# Python SDK package.
+/sdk/python/ @aimestereo
+
+# Release-critical workflows and scripts.
+/.github/workflows/release-python.yml @aimestereo
+/.github/workflows/tag-release.yml @aimestereo
+/scripts/prepare-release.sh @aimestereo
+/scripts/check_release_version.py @aimestereo
+
+# License file — never change without owner review.
+/LICENSE @aimestereo
