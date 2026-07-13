@@ -9,6 +9,10 @@ publishing — no long-lived tokens live in the repository. The published versio
 is whatever `sdk/python/src/truagents/__version__.py` records on the tagged
 commit, so the tag name and the module version must agree.
 
+The workflow verifies that the tag's commit is an ancestor of `origin/main`
+before publishing. Tags placed on unmerged branches or side branches fail the
+`verify-tag-on-main` job and the release does not fire.
+
 ## Prerequisites
 
 Before starting a release, confirm:
@@ -85,7 +89,8 @@ reservation, real releases follow the normal three-step flow above.
 ## Fallback: manual tag push
 
 Use this only when the auto-tag workflow is unavailable or you need to place
-the tag on a specific non-merge commit.
+the tag on a specific non-merge commit. The commit must still be an ancestor
+of `origin/main` or the `verify-tag-on-main` job will block the release.
 
 Replace `<version>` with the actual version string in all three occurrences
 below (e.g. `0.2.0`).
