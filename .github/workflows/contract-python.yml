@@ -1,0 +1,75 @@
+name: contract-python
+
+on:
+  pull_request:
+    paths:
+      - "sdk/python/**"
+      - "codegen/**"
+      - ".github/workflows/contract-python.yml"
+      - "LICENSE"
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  license-hash:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify LICENSE SHA256
+        run: |
+          echo "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30  LICENSE" | sha256sum -c -
+
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install SDK with dev extras
+        working-directory: sdk/python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+      - name: Ruff
+        working-directory: sdk/python
+        run: ruff check src tests examples
+      - name: Ruff format check
+        working-directory: sdk/python
+        run: ruff format --check src tests examples
+      - name: Pyright
+        working-directory: sdk/python
+        run: pyright src
+      - name: Unit tests
+        working-directory: sdk/python
+        run: pytest tests/unit -v
+
+  contract:
+    runs-on: ubuntu-latest
+    needs: unit
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      BASE_URL: ${{ vars.BASE_URL || 'https://api.dev-truagents.com' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install SDK with dev extras
+        working-directory: sdk/python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+      - name: Contract tests
+        working-directory: sdk/python
+        run: pytest tests/contract -v

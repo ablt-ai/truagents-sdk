@@ -35,3 +35,12 @@ coverage.xml
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Secrets / credentials (never commit)
+.env
+.env.*
+credentials*
+*.pem
+*.key
+*.p12
+*.pfx
