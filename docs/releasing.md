@@ -26,6 +26,9 @@ Before starting a release, confirm:
 The maintainer flow is three steps: prepare locally, merge via GitHub, let CI
 tag and publish.
 
+> **First release?** Complete [First-time PyPI setup](#first-time-pypi-setup)
+> before your first release PR merges. Subsequent releases skip this step.
+
 ### 1. Prepare the release PR
 
 From the repository root:
@@ -33,6 +36,9 @@ From the repository root:
 ```bash
 ./scripts/prepare-release.sh <version>
 ```
+
+Replace `<version>` with the concrete version, e.g.
+`./scripts/prepare-release.sh 0.2.0` (or `0.2.0.rc1`, `0.2.0.dev0`).
 
 The script validates the version string, confirms the preconditions above,
 bumps `sdk/python/src/truagents/__version__.py`, runs a local build sanity
@@ -78,8 +84,11 @@ reservation, real releases follow the normal three-step flow above.
 
 ## Fallback: manual tag push
 
-Maintainers who prefer explicit control can skip the auto-tag workflow and push
-the tag by hand after the release PR merges:
+Use this only when the auto-tag workflow is unavailable or you need to place
+the tag on a specific non-merge commit.
+
+Replace `<version>` with the actual version string in all four occurrences
+below (e.g. `0.2.0`).
 
 ```bash
 git fetch origin
@@ -92,9 +101,3 @@ git push origin sdk-python-v<version>
 
 The tag push still fires `release-python.yml`, so publication proceeds
 identically.
-
-## Known follow-ups
-
-- **Preview via TestPyPI.** A `workflow_dispatch` path on `release-python.yml`
-  that publishes to `test.pypi.org` for dry-run validation is not implemented
-  yet. Track this as a future improvement to `release-python.yml`.
