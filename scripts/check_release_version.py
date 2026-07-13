@@ -55,7 +55,7 @@ def main() -> int:
     new_str = sys.argv[1]
     try:
         new_v = Version(new_str)
-    except InvalidVersion:
+    except (InvalidVersion, TypeError):
         die(
             f"version '{new_str}' is not a valid PEP 440 version. "
             "Examples: 0.1.1, 0.2.0.rc1, 0.1.0.dev0, 0.1.0.post1."
@@ -64,8 +64,8 @@ def main() -> int:
     current_str = read_current_version()
     try:
         current_v = Version(current_str)
-    except InvalidVersion:
-        die(f"current version '{current_str}' from {VERSION_FILE} is not a valid PEP 440 version.")
+    except (InvalidVersion, TypeError):
+        die(f"current version {current_str!r} from {VERSION_FILE} is not a valid PEP 440 version.")
 
     if new_v <= current_v:
         die(

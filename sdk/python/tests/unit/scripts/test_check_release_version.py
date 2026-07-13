@@ -100,3 +100,16 @@ class TestFilesystemErrors:
         result = _run_in(repo, ["0.1.1"])
         assert result.returncode == 2
         assert "current version 'not-a-version'" in result.stderr
+
+    def test_non_string_version_exits_two(self, tmp_path: Path):
+        repo = _isolated_repo(tmp_path, version_file_body="__version__ = (0, 1, 0)\n")
+        result = _run_in(repo, ["0.1.1"])
+        assert result.returncode == 2
+        assert "not a valid PEP 440 version" in result.stderr
+        assert "Traceback" not in result.stderr
+
+    def test_missing_version_key_exits_two(self, tmp_path: Path):
+        repo = _isolated_repo(tmp_path, version_file_body='VERSION = "0.1.0"\n')
+        result = _run_in(repo, ["0.1.1"])
+        assert result.returncode == 2
+        assert "could not read __version__" in result.stderr
