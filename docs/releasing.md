@@ -21,9 +21,12 @@ Before starting a release, confirm:
 - Local `main` is up to date with `origin/main`.
 - The [`gh`](https://cli.github.com/) CLI is installed and authenticated
   (`gh auth status`).
-- `python -m build` is available locally
-  (`python -m pip install --upgrade build`) — the prep script uses it for a
-  pre-flight sanity check.
+- `python -m build` and `packaging` are available locally
+  (`python -m pip install --upgrade build packaging`) — the prep script uses
+  `build` for a pre-flight sanity check and `packaging` for PEP 440 version
+  validation.
+- The proposed version must be a valid PEP 440 version and strictly greater
+  than the current `__version__` on `main`.
 
 ## Making a release
 
@@ -47,7 +50,11 @@ Replace `<version>` with the concrete version, e.g.
 The script validates the version string, confirms the preconditions above,
 bumps `sdk/python/src/truagents/__version__.py`, runs a local build sanity
 check, commits, pushes a `release/sdk-python-v<version>` branch, and opens a
-release PR against `main`.
+release PR against `main`. The PEP 440 format and strictly-greater-than-current
+checks are delegated to
+[`scripts/check_release_version.py`](../scripts/check_release_version.py),
+which is also usable standalone for debugging (`python3
+scripts/check_release_version.py <version>`).
 
 Accepted version formats:
 
