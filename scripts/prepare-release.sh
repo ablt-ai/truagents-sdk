@@ -4,9 +4,6 @@
 # See docs/releasing.md for the full flow. Refs: B2B-2206.
 
 set -euo pipefail
-set -o errtrace
-
-trap 'echo "prepare-release.sh: failed at line $LINENO" >&2' ERR
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -41,7 +38,8 @@ fi
 
 cd "$REPO_ROOT"
 
-CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
+CURRENT_BRANCH="$(git symbolic-ref --short HEAD 2>/dev/null)" \
+  || die_validation "not on a named branch (detached HEAD?). Run: git checkout main"
 if [[ "$CURRENT_BRANCH" != "main" ]]; then
   die_validation "must run from 'main', currently on '$CURRENT_BRANCH'. Run: git checkout main"
 fi
@@ -75,6 +73,10 @@ RELEASE_BRANCH="release/sdk-python-v${VERSION}"
 
 if git show-ref --verify --quiet "refs/heads/${RELEASE_BRANCH}"; then
   die_validation "branch '${RELEASE_BRANCH}' already exists locally. Delete it first: git branch -D ${RELEASE_BRANCH}"
+fi
+
+if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null 2>&1; then
+  die_validation "branch '${RELEASE_BRANCH}' already exists on origin. Delete it: git push origin --delete ${RELEASE_BRANCH}"
 fi
 
 echo "prepare-release.sh: creating branch ${RELEASE_BRANCH}..."
