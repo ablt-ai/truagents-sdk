@@ -87,7 +87,7 @@ reservation, real releases follow the normal three-step flow above.
 Use this only when the auto-tag workflow is unavailable or you need to place
 the tag on a specific non-merge commit.
 
-Replace `<version>` with the actual version string in all four occurrences
+Replace `<version>` with the actual version string in all three occurrences
 below (e.g. `0.2.0`).
 
 ```bash
