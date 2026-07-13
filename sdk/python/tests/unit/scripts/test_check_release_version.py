@@ -51,13 +51,15 @@ class TestExitZero:
         assert result.returncode == 0, result.stderr
         assert result.stderr == ""
 
-    def test_pre_release_greater_than_current_exits_zero(self):
-        result = _run(["0.2.0.rc1"])
+    def test_pre_release_greater_than_current_exits_zero(self, tmp_path: Path):
+        repo = _isolated_repo(tmp_path, '__version__ = "0.1.0"\n')
+        result = _run_in(repo, ["0.2.0.rc1"])
         assert result.returncode == 0, result.stderr
 
     @pytest.mark.parametrize("version", ["0.1.1", "0.2.0", "1.0.0", "0.1.0.post1"])
-    def test_various_valid_greater_versions(self, version: str):
-        result = _run([version])
+    def test_various_valid_greater_versions(self, tmp_path: Path, version: str):
+        repo = _isolated_repo(tmp_path, '__version__ = "0.1.0"\n')
+        result = _run_in(repo, [version])
         assert result.returncode == 0, result.stderr
 
 
