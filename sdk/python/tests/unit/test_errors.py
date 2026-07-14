@@ -66,6 +66,13 @@ class TestBaseAndInstantiation:
         assert err.cause is cause
         assert err.code == "NETWORK_ERROR"
 
+    def test_auth_rate_limited_is_instance_of_rate_limited_mixin(self):
+        err = errors.AuthRateLimited(429, "too_many_requests", "x", 5.0)
+        assert isinstance(err, errors.RateLimitedMixin)
+        assert isinstance(err, errors.AuthError)
+        assert err.retry_after == 5.0
+        assert err.code == "AUTH_RATE_LIMITED"
+
 
 class TestClassifyOAuth:
     def test_400_invalid_grant_maps_to_invalid_grant(self):
@@ -94,6 +101,40 @@ class TestClassifyOAuth:
         resp = _response(400, text="not json")
         err = errors.classify_http_error(resp, "oauth")
         assert err.error == "unknown_error"
+
+    def test_429_maps_to_auth_rate_limited(self):
+        resp = _response(
+            429,
+            json_body={"error": "too_many_requests", "error_description": "Slow down"},
+            headers={"Retry-After": "42"},
+        )
+        err = errors.classify_http_error(resp, "oauth")
+        assert isinstance(err, errors.AuthRateLimited)
+        assert err.http_status == 429
+        assert err.error == "too_many_requests"
+        assert err.error_description == "Slow down"
+        assert err.retry_after == 42.0
+        assert err.code == "AUTH_RATE_LIMITED"
+
+    def test_429_no_header_defaults_to_zero_retry_after(self):
+        resp = _response(
+            429,
+            json_body={"error": "too_many_requests", "error_description": "Slow down"},
+        )
+        err = errors.classify_http_error(resp, "oauth")
+        assert isinstance(err, errors.AuthRateLimited)
+        assert err.retry_after == 0.0
+
+    def test_429_takes_precedence_over_400_and_401_branches(self):
+        resp = _response(
+            429,
+            json_body={"error": "invalid_grant", "error_description": "reused"},
+            headers={"Retry-After": "7"},
+        )
+        err = errors.classify_http_error(resp, "oauth")
+        assert isinstance(err, errors.AuthRateLimited)
+        assert not isinstance(err, errors.InvalidGrant)
+        assert err.retry_after == 7.0
 
 
 class TestClassifyAPI:
@@ -221,3 +262,13 @@ class TestPickleRoundTrip:
         original = errors.ServerError(500, "boom")
         restored = pickle.loads(pickle.dumps(original))
         assert type(restored) is errors.ServerError
+
+    def test_auth_rate_limited_roundtrips(self):
+        original = errors.AuthRateLimited(429, "too_many_requests", "Slow down", 12.5)
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.AuthRateLimited
+        assert restored.http_status == 429
+        assert restored.error == "too_many_requests"
+        assert restored.error_description == "Slow down"
+        assert restored.retry_after == 12.5
+        assert str(restored) == str(original)

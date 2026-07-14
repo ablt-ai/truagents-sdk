@@ -42,6 +42,10 @@ class TestShouldRetry:
         err = errors.RateLimited(429, "", retry_after=2.0)
         assert RetryPolicy().should_retry(err, 1) is True
 
+    def test_auth_rate_limited_retries(self):
+        err = errors.AuthRateLimited(429, "too_many_requests", "x", 5.0)
+        assert RetryPolicy().should_retry(err, 1) is True
+
     def test_not_found_never_retries(self):
         err = errors.NotFound(404, "")
         assert RetryPolicy().should_retry(err, 1) is False
@@ -62,6 +66,10 @@ class TestNextDelay:
     def test_rate_limited_returns_retry_after(self):
         err = errors.RateLimited(429, "", retry_after=5.0)
         assert RetryPolicy().next_delay(err, 1) == 5.0
+
+    def test_auth_rate_limited_honours_retry_after(self):
+        err = errors.AuthRateLimited(429, "too_many_requests", "x", 12.5)
+        assert RetryPolicy().next_delay(err, 1) == 12.5
 
     def test_rate_limited_caps_at_retry_after_cap(self):
         err = errors.RateLimited(429, "", retry_after=120.0)

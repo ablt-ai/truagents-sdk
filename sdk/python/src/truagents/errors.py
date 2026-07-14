@@ -27,7 +27,8 @@ class TruAgentsError(Exception):
     via those arguments. Without `__reduce__`, `Exception.args` carries only
     the formatted message and unpickling calls the subclass with a single
     positional string, dropping the typed fields (or raising `TypeError` for
-    multi-arg constructors). See `AuthError.__reduce__`, `APIError.__reduce__`,
+    multi-arg constructors). See `AuthError.__reduce__`,
+    `AuthRateLimited.__reduce__`, `APIError.__reduce__`,
     `RateLimited.__reduce__`, and `NetworkError.__reduce__` for the pattern.
     """
 
@@ -75,7 +76,19 @@ class APIError(TruAgentsError):
         return (type(self), (self.http_status, self.body))
 
 
-class RateLimited(APIError):
+class RateLimitedMixin:
+    """Structural marker for rate-limited errors carrying `Retry-After`.
+
+    Used as a mixin because `RateLimited` must remain under `APIError` and
+    `AuthRateLimited` under `AuthError` — no shared concrete base is possible.
+    Concrete subclasses assign `retry_after` in their `__init__` and are
+    responsible for their own `__reduce__` per `TruAgentsError` policy.
+    """
+
+    retry_after: float
+
+
+class RateLimited(APIError, RateLimitedMixin):
     code = "RATE_LIMITED"
 
     def __init__(self, http_status: int, body: str, retry_after: float) -> None:
@@ -87,6 +100,33 @@ class RateLimited(APIError):
 
     def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
         return (type(self), (self.http_status, self.body, self.retry_after))
+
+
+class AuthRateLimited(AuthError, RateLimitedMixin):
+    code = "AUTH_RATE_LIMITED"
+
+    def __init__(
+        self,
+        http_status: int,
+        error: str,
+        error_description: str,
+        retry_after: float,
+    ) -> None:
+        self.retry_after = retry_after
+        super().__init__(http_status, error, error_description)
+
+    def __str__(self) -> str:
+        return (
+            f"HTTP {self.http_status} error={self.error} "
+            f"error_description={self.error_description} "
+            f"retry_after={self.retry_after}s"
+        )
+
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
+        return (
+            type(self),
+            (self.http_status, self.error, self.error_description, self.retry_after),
+        )
 
 
 class NotFound(APIError):
@@ -173,6 +213,13 @@ def classify_http_error(response: httpx.Response, kind: Literal["oauth", "api"])
     status = response.status_code
     if kind == "oauth":
         error, description = _extract_oauth_error_fields(response)
+        if status == 429:
+            return AuthRateLimited(
+                status,
+                error,
+                description,
+                _parse_retry_after(response.headers.get("Retry-After")),
+            )
         if status == 400 and error == "invalid_grant":
             return InvalidGrant(status, error, description)
         if status == 401:
