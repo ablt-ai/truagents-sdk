@@ -40,7 +40,7 @@ honouring, observability hooks).
 └── .github/
     ├── CODEOWNERS
     ├── dependabot.yml
-    └── workflows/               # contract-python, release-python, spec-sync, tag-release
+    └── workflows/
 ```
 
 ## Stability
