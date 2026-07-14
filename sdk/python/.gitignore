@@ -1,4 +1,6 @@
 # uv lockfile — not committed for library projects.
 # Consumers install via pyproject.toml pins; the lockfile is a dev-only
-# convenience for reproducible local envs.
+# convenience for reproducible local envs. We also want CI to resolve
+# dependencies fresh each run so it exercises the latest versions
+# consumers actually get, not a pinned snapshot we happened to lock.
 uv.lock
