@@ -21,24 +21,26 @@ honouring, observability hooks).
 
 ```
 .
-├── README.md               # this file
-├── LICENSE                 # Apache 2.0
+├── README.md                    # this file
+├── LICENSE                      # Apache 2.0
 ├── SECURITY.md
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── docs/
-│   └── versioning.md       # release cadence + semver policy
+│   ├── releasing.md             # release runbook
+│   └── versioning.md            # release cadence + semver policy
 ├── codegen/
-│   ├── requirements.txt    # openapi-python-client + ruff pins
-│   └── generate-python.sh  # regenerates sdk/python/src/truagents/generated/
+│   ├── requirements.txt         # openapi-python-client + ruff pins
+│   └── generate-python.sh       # regenerates sdk/python/src/truagents/generated/
+├── scripts/
+│   ├── check_release_version.py # CI guard: version bump matches tag
+│   └── prepare-release.sh       # local release helper
 ├── sdk/
-│   └── python/             # Phase 1 SDK
-│       ├── README.md
-│       ├── pyproject.toml
-│       ├── src/truagents/
-│       ├── examples/
-│       └── tests/
-└── .github/workflows/      # contract-python, release-python, spec-sync
+│   └── python/                  # Phase 1 SDK
+└── .github/
+    ├── CODEOWNERS
+    ├── dependabot.yml
+    └── workflows/               # contract-python, release-python, spec-sync, tag-release
 ```
 
 ## Stability
