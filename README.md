@@ -10,12 +10,12 @@ honouring, observability hooks).
 
 ## Languages
 
-| Language   | Path            | Status                     | Package                              |
-|------------|-----------------|----------------------------|--------------------------------------|
-| Python     | `sdk/python/`   | **Phase 1 — available**    | [`truagents` on PyPI](https://pypi.org/project/truagents/) |
-| TypeScript | `sdk/nodejs/`   | Planned (Phase 2)          | `@truagents/nodejs` (npm)            |
-| Go         | `sdk/go/`       | Planned (Phase 2)          | `github.com/ablt-ai/truagents-sdk/sdk/go` |
-| Java       | `sdk/java/`     | Planned (Phase 2)          | `com.truagents:sdk` (Maven Central)  |
+| Language   | Path                                       | Status                                                                                                                                                                                                                                              | Package                                                                                                              |
+|------------|--------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| Python     | [`sdk/python/`](./sdk/python/)             | [![contract-python](https://github.com/ablt-ai/truagents-sdk/actions/workflows/contract-python.yml/badge.svg?branch=main)](https://github.com/ablt-ai/truagents-sdk/actions/workflows/contract-python.yml?branch=main)                              | [![PyPI](https://img.shields.io/pypi/v/truagents.svg)](https://pypi.org/project/truagents/)                          |
+| TypeScript | `sdk/nodejs/`                              | Planned (Phase 2)                                                                                                                                                                                                                                   | `@truagents/nodejs` (npm)                                                                                            |
+| Go         | `sdk/go/`                                  | Planned (Phase 2)                                                                                                                                                                                                                                   | `github.com/ablt-ai/truagents-sdk/sdk/go`                                                                            |
+| Java       | `sdk/java/`                                | Planned (Phase 2)                                                                                                                                                                                                                                   | `com.truagents:sdk` (Maven Central)                                                                                  |
 
 ## Repository layout
 
@@ -40,15 +40,6 @@ honouring, observability hooks).
 │       └── tests/
 └── .github/workflows/      # contract-python, release-python, spec-sync
 ```
-
-## Installation (Python)
-
-```bash
-pip install truagents
-```
-
-Quickstart, authentication, retry, and observability documentation lives in
-[`sdk/python/README.md`](./sdk/python/README.md).
 
 ## Stability
 
