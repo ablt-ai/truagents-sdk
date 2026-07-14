@@ -1,0 +1,4 @@
+# uv lockfile — not committed for library projects.
+# Consumers install via pyproject.toml pins; the lockfile is a dev-only
+# convenience for reproducible local envs.
+uv.lock
