@@ -7,7 +7,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.email_source_enum import EmailSourceEnum
+from ..models.source_enum import SourceEnum
 
 T = TypeVar("T", bound="EmailUnsubscribeRecord")
 
@@ -16,25 +16,29 @@ T = TypeVar("T", bound="EmailUnsubscribeRecord")
 class EmailUnsubscribeRecord:
     """
     Example:
-        {'email': 'john@example.com', 'unsubscribed': True, 'source': 'external_api', 'updated_at':
-            '2026-04-15T10:30:00Z'}
+        {'email': 'john@example.com', 'unsubscribed': True, 'source': 'api', 'updated_at': '2026-04-15T10:30:00Z'}
 
     Attributes:
         email (str): Email address, normalized to lowercase canonical form.
         unsubscribed (bool): `true` = opted out (TruAgents will not send on this channel).
-        source (EmailSourceEnum): The category of writer responsible for the row's most recent state change on the email
-            channel.
+        source (SourceEnum): The category of writer responsible for the row's most recent state change. The same five
+            values apply to every channel (email, SMS, voice).
 
-            - `external_api` — pushed by the partner via this API.
-            - `sendgrid` — derived from a SendGrid unsubscribe event.
+            - `api` — pushed by the partner via this API.
             - `admin` — manually changed by a TruAgents administrator.
-            - `import` — created during initial backfill from legacy per-contact flags.
+            - `import` — bulk import: CSV upload, CRM sync (HubSpot / Salesforce / Mailchimp), or the one-time legacy
+            backfill from pre-existing opt-out state.
+            - `user_action` — recipient took a concrete provider-observed action: SendGrid unsubscribe link, SendGrid list-
+            unsubscribe header, Twilio STOP / UNSUBSCRIBE keyword. Opt-ins via Twilio START / YES / UNSTOP emit the same
+            source with `unsubscribed: false`.
+            - `user_intent` — TruAgents inferred opt-out intent from an inbound message. The provider did not observe a
+            subscription action; TruAgents inferred intent from the inbound message and acted on the recipient's behalf.
         updated_at (datetime.datetime): ISO 8601 timestamp of the most recent state change.
     """
 
     email: str
     unsubscribed: bool
-    source: EmailSourceEnum
+    source: SourceEnum
     updated_at: datetime.datetime
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -67,7 +71,7 @@ class EmailUnsubscribeRecord:
 
         unsubscribed = d.pop("unsubscribed")
 
-        source = EmailSourceEnum(d.pop("source"))
+        source = SourceEnum(d.pop("source"))
 
         updated_at = datetime.datetime.fromisoformat(d.pop("updated_at"))
 

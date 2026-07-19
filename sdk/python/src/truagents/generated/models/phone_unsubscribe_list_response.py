@@ -17,7 +17,7 @@ T = TypeVar("T", bound="PhoneUnsubscribeListResponse")
 class PhoneUnsubscribeListResponse:
     """
     Example:
-        {'org_slug': 'acme-corp', 'data': [{'phone': '+15551234567', 'unsubscribed': True, 'source': 'twilio',
+        {'org_slug': 'acme-corp', 'data': [{'phone': '+15551234567', 'unsubscribed': True, 'source': 'user_action',
             'updated_at': '2026-04-12T16:22:01Z'}], 'next_cursor': None, 'has_more': False}
 
     Attributes:

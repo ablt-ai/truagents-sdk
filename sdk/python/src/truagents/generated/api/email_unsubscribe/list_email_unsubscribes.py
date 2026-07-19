@@ -52,12 +52,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> (
-    EmailUnsubscribeListResponse
-    | RestErrorResponse
-    | UnauthorizedOrganizationError
-    | None
-):
+) -> EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
     if response.status_code == 200:
         response_200 = EmailUnsubscribeListResponse.from_dict(response.json())
 
@@ -91,9 +86,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[
-    EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError
-]:
+) -> Response[EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -110,9 +103,7 @@ def sync_detailed(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> Response[
-    EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError
-]:
+) -> Response[EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError]:
     """List email opt-out / opt-in records
 
      Returns the current state of email unsubscribe records for the organization addressed by `org_slug`
@@ -158,12 +149,7 @@ def sync(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> (
-    EmailUnsubscribeListResponse
-    | RestErrorResponse
-    | UnauthorizedOrganizationError
-    | None
-):
+) -> EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
     """List email opt-out / opt-in records
 
      Returns the current state of email unsubscribe records for the organization addressed by `org_slug`
@@ -204,9 +190,7 @@ async def asyncio_detailed(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> Response[
-    EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError
-]:
+) -> Response[EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError]:
     """List email opt-out / opt-in records
 
      Returns the current state of email unsubscribe records for the organization addressed by `org_slug`
@@ -250,12 +234,7 @@ async def asyncio(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> (
-    EmailUnsubscribeListResponse
-    | RestErrorResponse
-    | UnauthorizedOrganizationError
-    | None
-):
+) -> EmailUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
     """List email opt-out / opt-in records
 
      Returns the current state of email unsubscribe records for the organization addressed by `org_slug`

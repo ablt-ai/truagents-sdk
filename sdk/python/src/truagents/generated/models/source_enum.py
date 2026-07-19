@@ -1,11 +1,12 @@
 from enum import Enum
 
 
-class EmailSourceEnum(str, Enum):
+class SourceEnum(str, Enum):
     ADMIN = "admin"
-    EXTERNAL_API = "external_api"
+    API = "api"
     IMPORT = "import"
-    SENDGRID = "sendgrid"
+    USER_ACTION = "user_action"
+    USER_INTENT = "user_intent"
 
     def __str__(self) -> str:
         return str(self.value)

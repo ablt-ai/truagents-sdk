@@ -6,9 +6,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.o_auth_client_credentials_request_grant_type import (
-    OAuthClientCredentialsRequestGrantType,
-)
+from ..models.o_auth_client_credentials_request_grant_type import OAuthClientCredentialsRequestGrantType
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="OAuthClientCredentialsRequest")

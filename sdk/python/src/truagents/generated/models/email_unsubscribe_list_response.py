@@ -17,7 +17,7 @@ T = TypeVar("T", bound="EmailUnsubscribeListResponse")
 class EmailUnsubscribeListResponse:
     """
     Example:
-        {'org_slug': 'acme-corp', 'data': [{'email': 'john@example.com', 'unsubscribed': True, 'source': 'external_api',
+        {'org_slug': 'acme-corp', 'data': [{'email': 'john@example.com', 'unsubscribed': True, 'source': 'api',
             'updated_at': '2026-04-15T10:30:00Z'}, {'email': 'alice@example.com', 'unsubscribed': False, 'source': 'admin',
             'updated_at': '2026-04-13T09:00:00Z'}], 'next_cursor':
             'eyJvcmciOiJhY21lLWNvcnAiLCJ0cyI6IjIwMjYtMDQtMTNUMDk6MDA6MDBaIn0', 'has_more': True}
