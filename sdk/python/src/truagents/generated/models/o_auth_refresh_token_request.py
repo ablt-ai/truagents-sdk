@@ -6,7 +6,9 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.o_auth_refresh_token_request_grant_type import OAuthRefreshTokenRequestGrantType
+from ..models.o_auth_refresh_token_request_grant_type import (
+    OAuthRefreshTokenRequestGrantType,
+)
 
 T = TypeVar("T", bound="OAuthRefreshTokenRequest")
 

@@ -68,7 +68,9 @@ class PhoneUnsubscribeBatchResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.phone_skipped_item import PhoneSkippedItem
-        from ..models.phone_unsubscribe_updated_entry import PhoneUnsubscribeUpdatedEntry
+        from ..models.phone_unsubscribe_updated_entry import (
+            PhoneUnsubscribeUpdatedEntry,
+        )
 
         d = dict(src_dict)
         org_slug = d.pop("org_slug")

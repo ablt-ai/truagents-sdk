@@ -6,7 +6,9 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.unauthorized_organization_error_error import UnauthorizedOrganizationErrorError
+from ..models.unauthorized_organization_error_error import (
+    UnauthorizedOrganizationErrorError,
+)
 
 T = TypeVar("T", bound="UnauthorizedOrganizationError")
 

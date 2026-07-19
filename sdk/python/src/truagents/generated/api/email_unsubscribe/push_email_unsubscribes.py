@@ -33,7 +33,12 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    EmailUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     if response.status_code == 200:
         response_200 = EmailUnsubscribeBatchResponse.from_dict(response.json())
 
@@ -72,7 +77,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -85,7 +92,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: EmailUnsubscribeBatchRequest,
-) -> Response[EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     """Push email opt-out / opt-in changes
 
      Apply a batch of `{ email, unsubscribed }` state changes to one organization — the value supplied in
@@ -121,7 +130,12 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     body: EmailUnsubscribeBatchRequest,
-) -> EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    EmailUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     """Push email opt-out / opt-in changes
 
      Apply a batch of `{ email, unsubscribed }` state changes to one organization — the value supplied in
@@ -152,7 +166,9 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: EmailUnsubscribeBatchRequest,
-) -> Response[EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     """Push email opt-out / opt-in changes
 
      Apply a batch of `{ email, unsubscribed }` state changes to one organization — the value supplied in
@@ -186,7 +202,12 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     body: EmailUnsubscribeBatchRequest,
-) -> EmailUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    EmailUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     """Push email opt-out / opt-in changes
 
      Apply a batch of `{ email, unsubscribed }` state changes to one organization — the value supplied in

@@ -33,7 +33,12 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    PhoneUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     if response.status_code == 200:
         response_200 = PhoneUnsubscribeBatchResponse.from_dict(response.json())
 
@@ -72,7 +77,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -85,7 +92,9 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
-) -> Response[PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     """Push voice (phone call) opt-out / opt-in changes
 
      Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in
@@ -120,7 +129,12 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
-) -> PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    PhoneUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     """Push voice (phone call) opt-out / opt-in changes
 
      Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in
@@ -150,7 +164,9 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
-) -> Response[PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     """Push voice (phone call) opt-out / opt-in changes
 
      Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in
@@ -183,7 +199,12 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
-) -> PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    PhoneUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     """Push voice (phone call) opt-out / opt-in changes
 
      Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in

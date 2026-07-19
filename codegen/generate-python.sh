@@ -11,5 +11,5 @@ openapi-python-client generate \
   --meta none \
   --overwrite
 
-ruff format "$OUTPUT_DIR"
-ruff check --fix "$OUTPUT_DIR"
+ruff format --line-length 88 "$OUTPUT_DIR"
+ruff check --line-length 88 --fix "$OUTPUT_DIR"

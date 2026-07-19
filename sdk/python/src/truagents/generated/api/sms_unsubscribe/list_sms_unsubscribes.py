@@ -52,7 +52,12 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    PhoneUnsubscribeListResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     if response.status_code == 200:
         response_200 = PhoneUnsubscribeListResponse.from_dict(response.json())
 
@@ -86,7 +91,9 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -103,7 +110,9 @@ def sync_detailed(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> Response[PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     """List SMS opt-out / opt-in records
 
      Returns the current state of SMS unsubscribe records for the organization addressed by `org_slug`
@@ -149,7 +158,12 @@ def sync(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    PhoneUnsubscribeListResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     """List SMS opt-out / opt-in records
 
      Returns the current state of SMS unsubscribe records for the organization addressed by `org_slug`
@@ -190,7 +204,9 @@ async def asyncio_detailed(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> Response[PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError]:
+) -> Response[
+    PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError
+]:
     """List SMS opt-out / opt-in records
 
      Returns the current state of SMS unsubscribe records for the organization addressed by `org_slug`
@@ -234,7 +250,12 @@ async def asyncio(
     until: datetime.datetime | Unset = UNSET,
     cursor: str | Unset = UNSET,
     limit: int | Unset = 100,
-) -> PhoneUnsubscribeListResponse | RestErrorResponse | UnauthorizedOrganizationError | None:
+) -> (
+    PhoneUnsubscribeListResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
+    | None
+):
     """List SMS opt-out / opt-in records
 
      Returns the current state of SMS unsubscribe records for the organization addressed by `org_slug`

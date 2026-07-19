@@ -9,7 +9,9 @@ from .email_unsubscribe_list_response import EmailUnsubscribeListResponse
 from .email_unsubscribe_record import EmailUnsubscribeRecord
 from .email_unsubscribe_updated_entry import EmailUnsubscribeUpdatedEntry
 from .o_auth_client_credentials_request import OAuthClientCredentialsRequest
-from .o_auth_client_credentials_request_grant_type import OAuthClientCredentialsRequestGrantType
+from .o_auth_client_credentials_request_grant_type import (
+    OAuthClientCredentialsRequestGrantType,
+)
 from .o_auth_error_response import OAuthErrorResponse
 from .o_auth_error_response_error import OAuthErrorResponseError
 from .o_auth_refresh_token_request import OAuthRefreshTokenRequest
