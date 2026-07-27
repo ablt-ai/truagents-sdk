@@ -8,6 +8,14 @@ import respx
 
 from truagents import errors
 from truagents.client import AsyncClient, Client
+from truagents.generated.models.email_unsubscribe_batch_request import (
+    EmailUnsubscribeBatchRequest,
+)
+from truagents.generated.models.email_unsubscribe_item import EmailUnsubscribeItem
+from truagents.generated.models.phone_unsubscribe_batch_request import (
+    PhoneUnsubscribeBatchRequest,
+)
+from truagents.generated.models.phone_unsubscribe_item import PhoneUnsubscribeItem
 from truagents.observability import Hooks, Request, Response
 from truagents.retry import DEFAULT_RETRY_POLICY, RetryPolicy
 
@@ -25,11 +33,27 @@ def _token_body(access_token: str = "AT-1", expires_in: int = 3600) -> dict:
 
 def _list_email_body() -> dict:
     return {
-        "org_slug": "acme-corp",
+        "group_id": "ug_ckxyz123",
         "data": [],
         "next_cursor": None,
         "has_more": False,
     }
+
+
+def _batch_response_body() -> dict:
+    return {"group_id": "ug_ckxyz123", "processed": 0, "updated": []}
+
+
+def _groups_body() -> dict:
+    return {"data": []}
+
+
+def _email_batch() -> EmailUnsubscribeBatchRequest:
+    return EmailUnsubscribeBatchRequest(items=[EmailUnsubscribeItem(email="john@example.com")])
+
+
+def _phone_batch() -> PhoneUnsubscribeBatchRequest:
+    return PhoneUnsubscribeBatchRequest(items=[PhoneUnsubscribeItem(phone="+15551234567")])
 
 
 class TestBearerAndUserAgent:
@@ -261,6 +285,83 @@ class TestAsyncClient:
         assert underlying is not None
         await client.aclose()
         assert underlying.is_closed
+
+
+_ADD_REMOVE_CASES = [
+    ("add_email_unsubscribes", "/api/v1/unsubscribe/email/add", _email_batch),
+    ("remove_email_unsubscribes", "/api/v1/unsubscribe/email/remove", _email_batch),
+    ("add_sms_unsubscribes", "/api/v1/unsubscribe/sms/add", _phone_batch),
+    ("remove_sms_unsubscribes", "/api/v1/unsubscribe/sms/remove", _phone_batch),
+    ("add_voice_unsubscribes", "/api/v1/unsubscribe/phone/add", _phone_batch),
+    ("remove_voice_unsubscribes", "/api/v1/unsubscribe/phone/remove", _phone_batch),
+]
+
+
+class TestAddRemoveSync:
+    @pytest.mark.parametrize(("method_name", "path", "batch"), _ADD_REMOVE_CASES)
+    @respx.mock
+    def test_add_remove_happy_path(self, method_name, path, batch):
+        respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("SECRET-TOKEN")))
+        api = respx.post(f"{BASE_URL}{path}").mock(return_value=httpx.Response(200, json=_batch_response_body()))
+        seen: list[Request] = []
+        hooks = Hooks(on_request=seen.append)
+        with Client("cid", "sec", base_url=BASE_URL, hooks=hooks) as client:
+            result = getattr(client, method_name)(batch())
+        assert api.called
+        assert result.group_id == "ug_ckxyz123"
+        assert api.calls[0].request.headers["Authorization"] == "Bearer SECRET-TOKEN"
+        assert api.calls[0].request.headers["User-Agent"].startswith("TruAgents-Python-SDK/")
+        assert any(r.method == method_name for r in seen)
+
+
+class TestAddRemoveAsync:
+    @pytest.mark.parametrize(("method_name", "path", "batch"), _ADD_REMOVE_CASES)
+    @respx.mock
+    async def test_add_remove_happy_path(self, method_name, path, batch):
+        respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("SECRET-TOKEN")))
+        api = respx.post(f"{BASE_URL}{path}").mock(return_value=httpx.Response(200, json=_batch_response_body()))
+        seen: list[Request] = []
+        hooks = Hooks(on_request=seen.append)
+        async with AsyncClient("cid", "sec", base_url=BASE_URL, hooks=hooks) as client:
+            result = await getattr(client, method_name)(batch())
+        assert api.called
+        assert result.group_id == "ug_ckxyz123"
+        assert api.calls[0].request.headers["Authorization"] == "Bearer SECRET-TOKEN"
+        assert api.calls[0].request.headers["User-Agent"].startswith("TruAgents-Python-SDK/")
+        assert any(r.method == method_name for r in seen)
+
+
+class TestListUnsubscribeGroups:
+    @respx.mock
+    def test_list_groups_sync(self):
+        respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("SECRET-TOKEN")))
+        api = respx.get(f"{BASE_URL}/api/v1/unsubscribe-groups").mock(
+            return_value=httpx.Response(200, json=_groups_body())
+        )
+        seen: list[Request] = []
+        hooks = Hooks(on_request=seen.append)
+        with Client("cid", "sec", base_url=BASE_URL, hooks=hooks) as client:
+            result = client.list_unsubscribe_groups()
+        assert api.called
+        assert result.data == []
+        assert api.calls[0].request.headers["Authorization"] == "Bearer SECRET-TOKEN"
+        assert api.calls[0].request.headers["User-Agent"].startswith("TruAgents-Python-SDK/")
+        assert any(r.method == "list_unsubscribe_groups" for r in seen)
+
+    @respx.mock
+    async def test_list_groups_async(self):
+        respx.post(f"{BASE_URL}/oauth/token").mock(return_value=httpx.Response(200, json=_token_body("SECRET-TOKEN")))
+        api = respx.get(f"{BASE_URL}/api/v1/unsubscribe-groups").mock(
+            return_value=httpx.Response(200, json=_groups_body())
+        )
+        seen: list[Request] = []
+        hooks = Hooks(on_request=seen.append)
+        async with AsyncClient("cid", "sec", base_url=BASE_URL, hooks=hooks) as client:
+            result = await client.list_unsubscribe_groups()
+        assert api.called
+        assert result.data == []
+        assert api.calls[0].request.headers["Authorization"] == "Bearer SECRET-TOKEN"
+        assert any(r.method == "list_unsubscribe_groups" for r in seen)
 
 
 class TestTransportErrorRetry:

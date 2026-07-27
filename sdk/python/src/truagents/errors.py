@@ -137,6 +137,28 @@ class InvalidRequest(APIError):
     code = "INVALID_REQUEST"
 
 
+class InvalidItemError(InvalidRequest):
+    """A batch item failed server-side validation; zero rows were persisted.
+
+    Subclasses `InvalidRequest` so `except InvalidRequest` keeps catching it.
+    Carries the zero-based `item_index` of the first invalid item and the
+    stable `item_error` reason string from the 400 `invalid_item` body.
+    """
+
+    code = "INVALID_ITEM"
+
+    def __init__(self, http_status: int, body: str, item_index: int, item_error: str) -> None:
+        self.item_index = item_index
+        self.item_error = item_error
+        super().__init__(http_status, body)
+
+    def __str__(self) -> str:
+        return f"HTTP {self.http_status} body={self.body} item_index={self.item_index} item_error={self.item_error}"
+
+    def __reduce__(self) -> tuple[Any, tuple[Any, ...]]:
+        return (type(self), (self.http_status, self.body, self.item_index, self.item_error))
+
+
 class ServerError(APIError):
     code = "SERVER_ERROR"
 
@@ -208,6 +230,31 @@ def _extract_oauth_error_fields(response: httpx.Response) -> tuple[str, str]:
     )
 
 
+def _extract_invalid_item_fields(response: httpx.Response) -> tuple[int, str] | None:
+    """Pull `item_index`/`item_error` from a 400 `invalid_item` body.
+
+    Returns `None` when the body is not JSON, not `invalid_item`, or is missing
+    either typed field — so classification degrades to `InvalidRequest`.
+
+    `item_index` comes from an untrusted 400 body and Python's `bool` is an
+    `int` subclass, so a `"item_index": true` is rejected rather than silently
+    decoded as index 1.
+    """
+    try:
+        body = response.json()
+    except ValueError:
+        return None
+    if not isinstance(body, dict) or body.get("error") != "invalid_item":
+        return None
+    item_index = body.get("item_index")
+    item_error = body.get("item_error")
+    if not isinstance(item_index, int) or isinstance(item_index, bool):
+        return None
+    if not isinstance(item_error, str):
+        return None
+    return item_index, item_error
+
+
 def classify_http_error(response: httpx.Response, kind: Literal["oauth", "api"]) -> TruAgentsError:
     """Map an HTTP response to the appropriate SDK exception subclass."""
     status = response.status_code
@@ -228,6 +275,9 @@ def classify_http_error(response: httpx.Response, kind: Literal["oauth", "api"])
 
     body = _decode_body(response)
     if status == 400:
+        invalid_item = _extract_invalid_item_fields(response)
+        if invalid_item is not None:
+            return InvalidItemError(status, body, invalid_item[0], invalid_item[1])
         return InvalidRequest(status, body)
     if status == 401:
         return TokenExpired(status, "token_expired", body)

@@ -14,6 +14,7 @@ from ...types import UNSET, Response, Unset
 
 def _get_kwargs(
     *,
+    group_id: str | Unset = UNSET,
     org_slug: str | Unset = UNSET,
     since: datetime.datetime | Unset = UNSET,
     until: datetime.datetime | Unset = UNSET,
@@ -22,6 +23,8 @@ def _get_kwargs(
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
+
+    params["group_id"] = group_id
 
     params["org_slug"] = org_slug
 
@@ -105,6 +108,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
+    group_id: str | Unset = UNSET,
     org_slug: str | Unset = UNSET,
     since: datetime.datetime | Unset = UNSET,
     until: datetime.datetime | Unset = UNSET,
@@ -115,14 +119,14 @@ def sync_detailed(
 ]:
     """List voice (phone call) opt-out / opt-in records
 
-     Returns the current state of voice unsubscribe records for the organization addressed by `org_slug`
-    (or the `client_id`'s default organization when omitted), ordered by `updated_at` descending. Treat
-    the endpoint as a change stream: `since` / `until` bound the pagination window and `cursor` walks
-    toward older records. Rate limited to 60 requests per minute per `client_id`. If your TruAgents
-    administrator has unified the targeted organization's SMS and voice scopes, this endpoint and `/sms`
-    surface the same underlying records.
+     Returns the current state of voice opt-out / opt-in records from the targeted group, ordered by
+    `updated_at` descending. Treat the endpoint as a change stream: `since` / `until` bound the
+    pagination window and `cursor` walks toward older records. Target via `group_id` or `org_slug` (at
+    most one; a cursor excludes both), or omit all targeting parameters for the key's default
+    organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
+        group_id (str | Unset):
         org_slug (str | Unset):
         since (datetime.datetime | Unset):
         until (datetime.datetime | Unset):
@@ -138,6 +142,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
+        group_id=group_id,
         org_slug=org_slug,
         since=since,
         until=until,
@@ -155,6 +160,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
+    group_id: str | Unset = UNSET,
     org_slug: str | Unset = UNSET,
     since: datetime.datetime | Unset = UNSET,
     until: datetime.datetime | Unset = UNSET,
@@ -168,14 +174,14 @@ def sync(
 ):
     """List voice (phone call) opt-out / opt-in records
 
-     Returns the current state of voice unsubscribe records for the organization addressed by `org_slug`
-    (or the `client_id`'s default organization when omitted), ordered by `updated_at` descending. Treat
-    the endpoint as a change stream: `since` / `until` bound the pagination window and `cursor` walks
-    toward older records. Rate limited to 60 requests per minute per `client_id`. If your TruAgents
-    administrator has unified the targeted organization's SMS and voice scopes, this endpoint and `/sms`
-    surface the same underlying records.
+     Returns the current state of voice opt-out / opt-in records from the targeted group, ordered by
+    `updated_at` descending. Treat the endpoint as a change stream: `since` / `until` bound the
+    pagination window and `cursor` walks toward older records. Target via `group_id` or `org_slug` (at
+    most one; a cursor excludes both), or omit all targeting parameters for the key's default
+    organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
+        group_id (str | Unset):
         org_slug (str | Unset):
         since (datetime.datetime | Unset):
         until (datetime.datetime | Unset):
@@ -192,6 +198,7 @@ def sync(
 
     return sync_detailed(
         client=client,
+        group_id=group_id,
         org_slug=org_slug,
         since=since,
         until=until,
@@ -203,6 +210,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
+    group_id: str | Unset = UNSET,
     org_slug: str | Unset = UNSET,
     since: datetime.datetime | Unset = UNSET,
     until: datetime.datetime | Unset = UNSET,
@@ -213,14 +221,14 @@ async def asyncio_detailed(
 ]:
     """List voice (phone call) opt-out / opt-in records
 
-     Returns the current state of voice unsubscribe records for the organization addressed by `org_slug`
-    (or the `client_id`'s default organization when omitted), ordered by `updated_at` descending. Treat
-    the endpoint as a change stream: `since` / `until` bound the pagination window and `cursor` walks
-    toward older records. Rate limited to 60 requests per minute per `client_id`. If your TruAgents
-    administrator has unified the targeted organization's SMS and voice scopes, this endpoint and `/sms`
-    surface the same underlying records.
+     Returns the current state of voice opt-out / opt-in records from the targeted group, ordered by
+    `updated_at` descending. Treat the endpoint as a change stream: `since` / `until` bound the
+    pagination window and `cursor` walks toward older records. Target via `group_id` or `org_slug` (at
+    most one; a cursor excludes both), or omit all targeting parameters for the key's default
+    organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
+        group_id (str | Unset):
         org_slug (str | Unset):
         since (datetime.datetime | Unset):
         until (datetime.datetime | Unset):
@@ -236,6 +244,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
+        group_id=group_id,
         org_slug=org_slug,
         since=since,
         until=until,
@@ -251,6 +260,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
+    group_id: str | Unset = UNSET,
     org_slug: str | Unset = UNSET,
     since: datetime.datetime | Unset = UNSET,
     until: datetime.datetime | Unset = UNSET,
@@ -264,14 +274,14 @@ async def asyncio(
 ):
     """List voice (phone call) opt-out / opt-in records
 
-     Returns the current state of voice unsubscribe records for the organization addressed by `org_slug`
-    (or the `client_id`'s default organization when omitted), ordered by `updated_at` descending. Treat
-    the endpoint as a change stream: `since` / `until` bound the pagination window and `cursor` walks
-    toward older records. Rate limited to 60 requests per minute per `client_id`. If your TruAgents
-    administrator has unified the targeted organization's SMS and voice scopes, this endpoint and `/sms`
-    surface the same underlying records.
+     Returns the current state of voice opt-out / opt-in records from the targeted group, ordered by
+    `updated_at` descending. Treat the endpoint as a change stream: `since` / `until` bound the
+    pagination window and `cursor` walks toward older records. Target via `group_id` or `org_slug` (at
+    most one; a cursor excludes both), or omit all targeting parameters for the key's default
+    organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
+        group_id (str | Unset):
         org_slug (str | Unset):
         since (datetime.datetime | Unset):
         until (datetime.datetime | Unset):
@@ -289,6 +299,7 @@ async def asyncio(
     return (
         await asyncio_detailed(
             client=client,
+            group_id=group_id,
             org_slug=org_slug,
             since=since,
             until=until,

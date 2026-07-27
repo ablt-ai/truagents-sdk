@@ -12,4 +12,9 @@ openapi-python-client generate \
   --overwrite
 
 ruff format --line-length 88 "$OUTPUT_DIR"
-ruff check --line-length 88 --fix "$OUTPUT_DIR"
+ruff check --line-length 88 --fix --exit-zero "$OUTPUT_DIR"
+
+# Fail closed on syntax errors (always-on) and undefined names; benign style is
+# handled above and lint-excluded in pyproject. generated/ is out of `ruff check
+# src` + `pyright src`, so this is the only fail-closed gate on codegen output.
+ruff check --select F821 "$OUTPUT_DIR"

@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 from ..models.unauthorized_organization_error_error import (
     UnauthorizedOrganizationErrorError,
 )
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="UnauthorizedOrganizationError")
 
@@ -25,15 +26,16 @@ class UnauthorizedOrganizationError:
         Attributes:
             error (UnauthorizedOrganizationErrorError):
             error_description (str): Human-readable description suitable for logging.
-            org_slug (str): The `org_slug` that was targeted — usually the value the caller supplied, echoed back so a typo
-                is visible in the caller's own logs without the server confirming whether the slug exists. In the defensive
-                N1-fallback path (the key's own default organization is somehow not in its authorized set), the server-resolved
-                default slug appears here instead.
+            org_slug (str | Unset): Echoed when the request targeted via `org_slug` — visible in your own logs without the
+                server confirming whether the slug exists. Absent on `group_id`-targeted rejections.
+            group_id (str | Unset): Echoed when the request targeted via `group_id` (supplied explicitly). Absent on
+                `org_slug`-targeted rejections.
     """
 
     error: UnauthorizedOrganizationErrorError
     error_description: str
-    org_slug: str
+    org_slug: str | Unset = UNSET
+    group_id: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -43,15 +45,20 @@ class UnauthorizedOrganizationError:
 
         org_slug = self.org_slug
 
+        group_id = self.group_id
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "error": error,
                 "error_description": error_description,
-                "org_slug": org_slug,
             }
         )
+        if org_slug is not UNSET:
+            field_dict["org_slug"] = org_slug
+        if group_id is not UNSET:
+            field_dict["group_id"] = group_id
 
         return field_dict
 
@@ -62,12 +69,15 @@ class UnauthorizedOrganizationError:
 
         error_description = d.pop("error_description")
 
-        org_slug = d.pop("org_slug")
+        org_slug = d.pop("org_slug", UNSET)
+
+        group_id = d.pop("group_id", UNSET)
 
         unauthorized_organization_error = cls(
             error=error,
             error_description=error_description,
             org_slug=org_slug,
+            group_id=group_id,
         )
 
         unauthorized_organization_error.additional_properties = d

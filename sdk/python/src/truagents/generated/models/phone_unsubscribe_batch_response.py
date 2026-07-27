@@ -7,7 +7,6 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.phone_skipped_item import PhoneSkippedItem
     from ..models.phone_unsubscribe_updated_entry import PhoneUnsubscribeUpdatedEntry
 
 
@@ -18,27 +17,24 @@ T = TypeVar("T", bound="PhoneUnsubscribeBatchResponse")
 class PhoneUnsubscribeBatchResponse:
     """
     Example:
-        {'org_slug': 'acme-corp', 'processed': 1, 'updated': [{'phone': '+15551234567', 'unsubscribed': True,
-            'updated_at': '2026-04-15T10:30:00Z'}], 'skipped_items': []}
+        {'group_id': 'ug_ckxyz123', 'processed': 1, 'updated': [{'phone': '+15551234567', 'unsubscribed': True,
+            'updated_at': '2026-04-15T10:30:00Z'}]}
 
     Attributes:
-        org_slug (str): Organization the batch was applied to — the value you supplied, or your key's default
-            organization when you omitted it. Example: acme-corp.
-        processed (int): Count of items accepted into `updated` — equal to `items.length − skipped_items.length`.
+        group_id (str): Group the batch was applied to — the one you targeted, or the one your `org_slug` / default
+            organization resolved to. Example: ug_ckxyz123.
+        processed (int): Count of items written — always `items.length` on a 200 (the batch is all-or-nothing).
             Idempotent writes (item already at requested state) are counted.
-        updated (list[PhoneUnsubscribeUpdatedEntry]): One entry per accepted input item, in input order.
-        skipped_items (list[PhoneSkippedItem]): Items rejected by per-item validation; each carries the original field
-            echoes plus a `reason`.
+        updated (list[PhoneUnsubscribeUpdatedEntry]): One entry per input item, in input order.
     """
 
-    org_slug: str
+    group_id: str
     processed: int
     updated: list[PhoneUnsubscribeUpdatedEntry]
-    skipped_items: list[PhoneSkippedItem]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        org_slug = self.org_slug
+        group_id = self.group_id
 
         processed = self.processed
 
@@ -47,19 +43,13 @@ class PhoneUnsubscribeBatchResponse:
             updated_item = updated_item_data.to_dict()
             updated.append(updated_item)
 
-        skipped_items = []
-        for skipped_items_item_data in self.skipped_items:
-            skipped_items_item = skipped_items_item_data.to_dict()
-            skipped_items.append(skipped_items_item)
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "org_slug": org_slug,
+                "group_id": group_id,
                 "processed": processed,
                 "updated": updated,
-                "skipped_items": skipped_items,
             }
         )
 
@@ -67,13 +57,12 @@ class PhoneUnsubscribeBatchResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.phone_skipped_item import PhoneSkippedItem
         from ..models.phone_unsubscribe_updated_entry import (
             PhoneUnsubscribeUpdatedEntry,
         )
 
         d = dict(src_dict)
-        org_slug = d.pop("org_slug")
+        group_id = d.pop("group_id")
 
         processed = d.pop("processed")
 
@@ -84,18 +73,10 @@ class PhoneUnsubscribeBatchResponse:
 
             updated.append(updated_item)
 
-        skipped_items = []
-        _skipped_items = d.pop("skipped_items")
-        for skipped_items_item_data in _skipped_items:
-            skipped_items_item = PhoneSkippedItem.from_dict(skipped_items_item_data)
-
-            skipped_items.append(skipped_items_item)
-
         phone_unsubscribe_batch_response = cls(
-            org_slug=org_slug,
+            group_id=group_id,
             processed=processed,
             updated=updated,
-            skipped_items=skipped_items,
         )
 
         phone_unsubscribe_batch_response.additional_properties = d

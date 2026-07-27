@@ -7,7 +7,6 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.email_skipped_item import EmailSkippedItem
     from ..models.email_unsubscribe_updated_entry import EmailUnsubscribeUpdatedEntry
 
 
@@ -18,28 +17,25 @@ T = TypeVar("T", bound="EmailUnsubscribeBatchResponse")
 class EmailUnsubscribeBatchResponse:
     """
     Example:
-        {'org_slug': 'acme-corp', 'processed': 2, 'updated': [{'email': 'john@example.com', 'unsubscribed': True,
-            'updated_at': '2026-04-15T10:30:00Z'}, {'email': 'alice@example.com', 'unsubscribed': False, 'updated_at':
-            '2026-03-02T14:11:42Z'}], 'skipped_items': []}
+        {'group_id': 'ug_ckxyz123', 'processed': 2, 'updated': [{'email': 'john@example.com', 'unsubscribed': True,
+            'updated_at': '2026-04-15T10:30:00Z'}, {'email': 'alice@example.com', 'unsubscribed': True, 'updated_at':
+            '2026-04-15T10:30:00Z'}]}
 
     Attributes:
-        org_slug (str): Organization the batch was applied to — the value you supplied, or your key's default
-            organization when you omitted it. Example: acme-corp.
-        processed (int): Count of items accepted into `updated` — equal to `items.length − skipped_items.length`.
+        group_id (str): Group the batch was applied to — the one you targeted, or the one your `org_slug` / default
+            organization resolved to. Example: ug_ckxyz123.
+        processed (int): Count of items written — always `items.length` on a 200 (the batch is all-or-nothing).
             Idempotent writes (item already at requested state) are counted.
-        updated (list[EmailUnsubscribeUpdatedEntry]): One entry per accepted input item, in input order.
-        skipped_items (list[EmailSkippedItem]): Items rejected by per-item validation; each carries the original field
-            echoes plus a `reason`.
+        updated (list[EmailUnsubscribeUpdatedEntry]): One entry per input item, in input order.
     """
 
-    org_slug: str
+    group_id: str
     processed: int
     updated: list[EmailUnsubscribeUpdatedEntry]
-    skipped_items: list[EmailSkippedItem]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        org_slug = self.org_slug
+        group_id = self.group_id
 
         processed = self.processed
 
@@ -48,19 +44,13 @@ class EmailUnsubscribeBatchResponse:
             updated_item = updated_item_data.to_dict()
             updated.append(updated_item)
 
-        skipped_items = []
-        for skipped_items_item_data in self.skipped_items:
-            skipped_items_item = skipped_items_item_data.to_dict()
-            skipped_items.append(skipped_items_item)
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "org_slug": org_slug,
+                "group_id": group_id,
                 "processed": processed,
                 "updated": updated,
-                "skipped_items": skipped_items,
             }
         )
 
@@ -68,13 +58,12 @@ class EmailUnsubscribeBatchResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.email_skipped_item import EmailSkippedItem
         from ..models.email_unsubscribe_updated_entry import (
             EmailUnsubscribeUpdatedEntry,
         )
 
         d = dict(src_dict)
-        org_slug = d.pop("org_slug")
+        group_id = d.pop("group_id")
 
         processed = d.pop("processed")
 
@@ -85,18 +74,10 @@ class EmailUnsubscribeBatchResponse:
 
             updated.append(updated_item)
 
-        skipped_items = []
-        _skipped_items = d.pop("skipped_items")
-        for skipped_items_item_data in _skipped_items:
-            skipped_items_item = EmailSkippedItem.from_dict(skipped_items_item_data)
-
-            skipped_items.append(skipped_items_item)
-
         email_unsubscribe_batch_response = cls(
-            org_slug=org_slug,
+            group_id=group_id,
             processed=processed,
             updated=updated,
-            skipped_items=skipped_items,
         )
 
         email_unsubscribe_batch_response.additional_properties = d

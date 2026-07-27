@@ -17,28 +17,28 @@ T = TypeVar("T", bound="EmailUnsubscribeListResponse")
 class EmailUnsubscribeListResponse:
     """
     Example:
-        {'org_slug': 'acme-corp', 'data': [{'email': 'john@example.com', 'unsubscribed': True, 'source': 'api',
+        {'group_id': 'ug_ckxyz123', 'data': [{'email': 'john@example.com', 'unsubscribed': True, 'source': 'api',
             'updated_at': '2026-04-15T10:30:00Z'}, {'email': 'alice@example.com', 'unsubscribed': False, 'source': 'admin',
-            'updated_at': '2026-04-13T09:00:00Z'}], 'next_cursor':
-            'eyJvcmciOiJhY21lLWNvcnAiLCJ0cyI6IjIwMjYtMDQtMTNUMDk6MDA6MDBaIn0', 'has_more': True}
+            'updated_at': '2026-04-13T09:00:00Z'}], 'next_cursor': 'eyJncm91cF9pZCI6InVnX2NreHl6MTIzIiwibGFzdF91cGRhdGVkX2F0
+            IjoiMjAyNi0wNC0xM1QwOTowMDowMFoiLCJsYXN0X2lkIjoicmVjX2NrN2YyYTlkMSJ9', 'has_more': True}
 
     Attributes:
-        org_slug (str): Organization this page belongs to — the value you supplied, the one carried by `cursor`, or your
-            key's default organization when neither was provided. Example: acme-corp.
+        group_id (str): Group this page belongs to — the one you targeted, or the one your `org_slug` / default
+            organization resolved to. Example: ug_ckxyz123.
         data (list[EmailUnsubscribeRecord]):
         next_cursor (None | str): Pass to the `cursor` query parameter to fetch the next page. `null` when no more
             results are available. See the `Cursor` parameter for the encoding contract.
         has_more (bool):
     """
 
-    org_slug: str
+    group_id: str
     data: list[EmailUnsubscribeRecord]
     next_cursor: None | str
     has_more: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        org_slug = self.org_slug
+        group_id = self.group_id
 
         data = []
         for data_item_data in self.data:
@@ -54,7 +54,7 @@ class EmailUnsubscribeListResponse:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "org_slug": org_slug,
+                "group_id": group_id,
                 "data": data,
                 "next_cursor": next_cursor,
                 "has_more": has_more,
@@ -68,7 +68,7 @@ class EmailUnsubscribeListResponse:
         from ..models.email_unsubscribe_record import EmailUnsubscribeRecord
 
         d = dict(src_dict)
-        org_slug = d.pop("org_slug")
+        group_id = d.pop("group_id")
 
         data = []
         _data = d.pop("data")
@@ -87,7 +87,7 @@ class EmailUnsubscribeListResponse:
         has_more = d.pop("has_more")
 
         email_unsubscribe_list_response = cls(
-            org_slug=org_slug,
+            group_id=group_id,
             data=data,
             next_cursor=next_cursor,
             has_more=has_more,
