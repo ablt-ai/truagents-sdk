@@ -1,11 +1,11 @@
 from enum import Enum
 
 
-class PhoneSkippedItemReason(str, Enum):
+class InvalidItemErrorItemError(str, Enum):
     DUPLICATE_IDENTIFIER = "duplicate identifier"
+    INVALID_EMAIL_FORMAT = "invalid email format"
     INVALID_PHONE_FORMAT = "invalid phone format"
     MISSING_IDENTIFIER = "missing identifier"
-    MISSING_UNSUBSCRIBED = "missing unsubscribed"
 
     def __str__(self) -> str:
         return str(self.value)

@@ -6,8 +6,8 @@ and the guarantees you cannot rely on yet.
 
 ## The `0.x` phase — where we are today
 
-The Python SDK ships at `0.1.0`. Semver treats the `0.x` range as pre-stable,
-and we treat it the same way.
+The Python SDK's next release is `0.4.0`. Semver treats the `0.x` range as
+pre-stable, and we treat it the same way.
 
 - **Minor bumps (`0.1.0` -> `0.2.0`) may introduce breaking changes.** They will
   not do so silently.
@@ -20,6 +20,26 @@ and we treat it the same way.
     partners get one release of runway.
 - We do **not** backport fixes to older minors while at `0.x`. Upgrade to the
   latest minor to get security and behavioural fixes.
+
+### Breaking changes in `0.4.0`
+
+`0.4.0` reshapes the unsubscribe surface around unsubscribe groups. These are a
+documented clean break shipped **without** a `DeprecationWarning` — the reshape
+renames response fields and splits a method into two verbs, which cannot be
+expressed as a runtime-warned shim. This is the "where feasible" clause above
+firing on the not-feasible side; the migration lives here and in the package
+README instead.
+
+- **`org_slug` → `group_id` in responses.** List and batch responses now carry
+  the resolved `group_id` of the group they read from or wrote to.
+- **`push_*` split into `add_*` / `remove_*`.** `push_{email,sms,voice}_unsubscribes`
+  is gone; opt an identifier out with `add_*` and back in with `remove_*`. The
+  direction is the verb — item bodies no longer carry an `unsubscribed` field.
+- **`skipped_items` removed — batches are all-or-nothing.** A batch is validated
+  as a whole before anything is written; any invalid item aborts the batch with
+  zero rows persisted and raises `errors.InvalidItemError` (carrying `item_index`
+  and `item_error`).
+- **New `list_unsubscribe_groups()`** discovers the groups a key can target.
 
 ## Promotion to `1.0.0`
 

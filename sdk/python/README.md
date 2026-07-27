@@ -45,6 +45,40 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
+## Writing unsubscribes
+
+Opt identifiers out with `add_*` and back in with `remove_*` — the verb is the
+direction, so items carry only the identifier. Batches are all-or-nothing: any
+invalid item aborts the whole batch (zero rows written) and raises
+`errors.InvalidItemError`.
+
+```python
+from truagents import Client
+from truagents.generated.models.email_unsubscribe_batch_request import (
+    EmailUnsubscribeBatchRequest,
+)
+from truagents.generated.models.email_unsubscribe_item import EmailUnsubscribeItem
+
+with Client(client_id="...", client_secret="...") as client:
+    groups = client.list_unsubscribe_groups()
+    group_id = groups.data[0].id
+
+    batch = EmailUnsubscribeBatchRequest(
+        items=[EmailUnsubscribeItem(email="john@example.com")],
+        group_id=group_id,
+    )
+    result = client.add_email_unsubscribes(batch)
+    print(result.group_id, result.processed)
+
+    client.remove_email_unsubscribes(batch)
+```
+
+Target a batch with **either** `group_id` **or** `org_slug`, never both — the
+two are mutually exclusive and the server rejects a request that carries both.
+Omit both to write to the key's default organization. SMS and voice mirror this
+shape via `add_sms_unsubscribes` / `remove_sms_unsubscribes` and
+`add_voice_unsubscribes` / `remove_voice_unsubscribes` (items carry `phone=`).
+
 ## Authentication
 
 `TokenManager` (owned by the client) mints an access token via
@@ -117,6 +151,7 @@ All SDK exceptions inherit from `truagents.errors.TruAgentsError`.
 | `TokenExpired`       | API endpoint returned 401 (external revocation).    |
 | `APIError`           | Base of API endpoint failures.                     |
 | `InvalidRequest`     | API endpoint returned 400.                         |
+| `InvalidItemError`   | API endpoint returned 400 `invalid_item` — a batch item failed validation; carries `item_index` + `item_error`, zero rows persisted. Subclass of `InvalidRequest`. |
 | `NotFound`           | API endpoint returned 404.                         |
 | `RateLimited`        | API endpoint returned 429. Carries `retry_after`.  |
 | `ServerError`        | API endpoint returned 5xx.                         |

@@ -19,18 +19,20 @@ T = TypeVar("T", bound="EmailUnsubscribeBatchRequest")
 class EmailUnsubscribeBatchRequest:
     """
     Example:
-        {'org_slug': 'acme-corp', 'items': [{'email': 'john@example.com', 'unsubscribed': True}, {'email':
-            'alice@example.com', 'unsubscribed': False}]}
+        {'org_slug': 'acme-corp', 'items': [{'email': 'john@example.com'}, {'email': 'alice@example.com'}]}
 
     Attributes:
-        items (list[EmailUnsubscribeItem]): Up to 10,000 items per request. Items are processed in array order; partial
-            failures do not roll back accepted items.
-        org_slug (str | Unset): Organization to write to. Must be in your `client_id`'s authorized set. Omit to use the
-            key's default organization. One batch targets exactly one organization — to write to several organizations, send
-            one request per organization. Example: acme-corp.
+        items (list[EmailUnsubscribeItem]): Up to 10,000 items per request; an empty array is accepted and writes
+            nothing. The batch is all-or-nothing: it is validated as a whole before anything is written, and any invalid
+            item rejects the entire request with `400 invalid_item` and zero rows persisted.
+        group_id (str | Unset): Group to write to, by id from `GET /api/v1/unsubscribe-groups`. Mutually exclusive with
+            `org_slug`. Example: ug_ckxyz123.
+        org_slug (str | Unset): Organization whose default channel group to write to. Must be in your key's authorized
+            set. Mutually exclusive with `group_id`. Omit both to use the key's default organization. Example: acme-corp.
     """
 
     items: list[EmailUnsubscribeItem]
+    group_id: str | Unset = UNSET
     org_slug: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -39,6 +41,8 @@ class EmailUnsubscribeBatchRequest:
         for items_item_data in self.items:
             items_item = items_item_data.to_dict()
             items.append(items_item)
+
+        group_id = self.group_id
 
         org_slug = self.org_slug
 
@@ -49,6 +53,8 @@ class EmailUnsubscribeBatchRequest:
                 "items": items,
             }
         )
+        if group_id is not UNSET:
+            field_dict["group_id"] = group_id
         if org_slug is not UNSET:
             field_dict["org_slug"] = org_slug
 
@@ -66,10 +72,13 @@ class EmailUnsubscribeBatchRequest:
 
             items.append(items_item)
 
+        group_id = d.pop("group_id", UNSET)
+
         org_slug = d.pop("org_slug", UNSET)
 
         email_unsubscribe_batch_request = cls(
             items=items,
+            group_id=group_id,
             org_slug=org_slug,
         )
 

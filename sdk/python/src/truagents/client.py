@@ -28,16 +28,20 @@ from truagents.__version__ import __version__
 from truagents.auth import TokenManager
 from truagents.generated import AuthenticatedClient
 from truagents.generated.api.email_unsubscribe import (
+    add_email_unsubscribes,
     list_email_unsubscribes,
-    push_email_unsubscribes,
+    remove_email_unsubscribes,
 )
 from truagents.generated.api.sms_unsubscribe import (
+    add_sms_unsubscribes,
     list_sms_unsubscribes,
-    push_sms_unsubscribes,
+    remove_sms_unsubscribes,
 )
+from truagents.generated.api.unsubscribe_groups import list_unsubscribe_groups
 from truagents.generated.api.voice_unsubscribe import (
+    add_phone_unsubscribes,
     list_phone_unsubscribes,
-    push_phone_unsubscribes,
+    remove_phone_unsubscribes,
 )
 from truagents.observability import Hooks, Request, Response
 from truagents.retry import DEFAULT_RETRY_POLICY, RetryPolicy
@@ -60,6 +64,9 @@ if TYPE_CHECKING:  # pragma: no cover
     )
     from truagents.generated.models.phone_unsubscribe_list_response import (
         PhoneUnsubscribeListResponse,
+    )
+    from truagents.generated.models.unsubscribe_groups_response import (
+        UnsubscribeGroupsResponse,
     )
 
 
@@ -135,16 +142,28 @@ class _ClientBase:
 class Client(_ClientBase):
     """Synchronous client for the TruAgents Unsubscribe API."""
 
+    def list_unsubscribe_groups(self, **params: Any) -> UnsubscribeGroupsResponse:
+        return self._call_resource_sync(
+            "list_unsubscribe_groups",
+            lambda client: list_unsubscribe_groups.sync_detailed(client=client, **params),
+        )
+
     def list_email_unsubscribes(self, **params: Any) -> EmailUnsubscribeListResponse:
         return self._call_resource_sync(
             "list_email_unsubscribes",
             lambda client: list_email_unsubscribes.sync_detailed(client=client, **params),
         )
 
-    def push_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
+    def add_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
         return self._call_resource_sync(
-            "push_email_unsubscribes",
-            lambda client: push_email_unsubscribes.sync_detailed(client=client, body=batch),
+            "add_email_unsubscribes",
+            lambda client: add_email_unsubscribes.sync_detailed(client=client, body=batch),
+        )
+
+    def remove_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
+        return self._call_resource_sync(
+            "remove_email_unsubscribes",
+            lambda client: remove_email_unsubscribes.sync_detailed(client=client, body=batch),
         )
 
     def list_sms_unsubscribes(self, **params: Any) -> PhoneUnsubscribeListResponse:
@@ -153,10 +172,16 @@ class Client(_ClientBase):
             lambda client: list_sms_unsubscribes.sync_detailed(client=client, **params),
         )
 
-    def push_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+    def add_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return self._call_resource_sync(
-            "push_sms_unsubscribes",
-            lambda client: push_sms_unsubscribes.sync_detailed(client=client, body=batch),
+            "add_sms_unsubscribes",
+            lambda client: add_sms_unsubscribes.sync_detailed(client=client, body=batch),
+        )
+
+    def remove_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+        return self._call_resource_sync(
+            "remove_sms_unsubscribes",
+            lambda client: remove_sms_unsubscribes.sync_detailed(client=client, body=batch),
         )
 
     def list_voice_unsubscribes(self, **params: Any) -> PhoneUnsubscribeListResponse:
@@ -165,10 +190,16 @@ class Client(_ClientBase):
             lambda client: list_phone_unsubscribes.sync_detailed(client=client, **params),
         )
 
-    def push_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+    def add_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return self._call_resource_sync(
-            "push_voice_unsubscribes",
-            lambda client: push_phone_unsubscribes.sync_detailed(client=client, body=batch),
+            "add_voice_unsubscribes",
+            lambda client: add_phone_unsubscribes.sync_detailed(client=client, body=batch),
+        )
+
+    def remove_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+        return self._call_resource_sync(
+            "remove_voice_unsubscribes",
+            lambda client: remove_phone_unsubscribes.sync_detailed(client=client, body=batch),
         )
 
     def close(self) -> None:
@@ -221,16 +252,28 @@ class Client(_ClientBase):
 class AsyncClient(_ClientBase):
     """Asynchronous client for the TruAgents Unsubscribe API."""
 
+    async def list_unsubscribe_groups(self, **params: Any) -> UnsubscribeGroupsResponse:
+        return await self._call_resource_async(
+            "list_unsubscribe_groups",
+            lambda client: list_unsubscribe_groups.asyncio_detailed(client=client, **params),
+        )
+
     async def list_email_unsubscribes(self, **params: Any) -> EmailUnsubscribeListResponse:
         return await self._call_resource_async(
             "list_email_unsubscribes",
             lambda client: list_email_unsubscribes.asyncio_detailed(client=client, **params),
         )
 
-    async def push_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
+    async def add_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
         return await self._call_resource_async(
-            "push_email_unsubscribes",
-            lambda client: push_email_unsubscribes.asyncio_detailed(client=client, body=batch),
+            "add_email_unsubscribes",
+            lambda client: add_email_unsubscribes.asyncio_detailed(client=client, body=batch),
+        )
+
+    async def remove_email_unsubscribes(self, batch: EmailUnsubscribeBatchRequest) -> EmailUnsubscribeBatchResponse:
+        return await self._call_resource_async(
+            "remove_email_unsubscribes",
+            lambda client: remove_email_unsubscribes.asyncio_detailed(client=client, body=batch),
         )
 
     async def list_sms_unsubscribes(self, **params: Any) -> PhoneUnsubscribeListResponse:
@@ -239,10 +282,16 @@ class AsyncClient(_ClientBase):
             lambda client: list_sms_unsubscribes.asyncio_detailed(client=client, **params),
         )
 
-    async def push_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+    async def add_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return await self._call_resource_async(
-            "push_sms_unsubscribes",
-            lambda client: push_sms_unsubscribes.asyncio_detailed(client=client, body=batch),
+            "add_sms_unsubscribes",
+            lambda client: add_sms_unsubscribes.asyncio_detailed(client=client, body=batch),
+        )
+
+    async def remove_sms_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+        return await self._call_resource_async(
+            "remove_sms_unsubscribes",
+            lambda client: remove_sms_unsubscribes.asyncio_detailed(client=client, body=batch),
         )
 
     async def list_voice_unsubscribes(self, **params: Any) -> PhoneUnsubscribeListResponse:
@@ -251,10 +300,16 @@ class AsyncClient(_ClientBase):
             lambda client: list_phone_unsubscribes.asyncio_detailed(client=client, **params),
         )
 
-    async def push_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+    async def add_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
         return await self._call_resource_async(
-            "push_voice_unsubscribes",
-            lambda client: push_phone_unsubscribes.asyncio_detailed(client=client, body=batch),
+            "add_voice_unsubscribes",
+            lambda client: add_phone_unsubscribes.asyncio_detailed(client=client, body=batch),
+        )
+
+    async def remove_voice_unsubscribes(self, batch: PhoneUnsubscribeBatchRequest) -> PhoneUnsubscribeBatchResponse:
+        return await self._call_resource_async(
+            "remove_voice_unsubscribes",
+            lambda client: remove_phone_unsubscribes.asyncio_detailed(client=client, body=batch),
         )
 
     async def aclose(self) -> None:

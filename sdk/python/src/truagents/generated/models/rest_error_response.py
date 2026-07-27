@@ -13,22 +13,22 @@ T = TypeVar("T", bound="RestErrorResponse")
 
 @_attrs_define
 class RestErrorResponse:
-    """Generic error envelope for the `/api/v1/unsubscribe/*` endpoints when a structured per-item response
-    (`*BatchResponse`) does not apply.
+    """Generic error envelope for the `/api/v1/unsubscribe*` endpoints when a more specific error schema does not apply.
 
-        Attributes:
-            error (str): Short machine-readable error code.
-            message (str | Unset): Human-readable description suitable for logging.
+    Attributes:
+        error (str): Short machine-readable error code.
+        error_description (str | Unset): Human-readable description suitable for logging. Wording may change without
+            notice — program against `error`.
     """
 
     error: str
-    message: str | Unset = UNSET
+    error_description: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         error = self.error
 
-        message = self.message
+        error_description = self.error_description
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -37,8 +37,8 @@ class RestErrorResponse:
                 "error": error,
             }
         )
-        if message is not UNSET:
-            field_dict["message"] = message
+        if error_description is not UNSET:
+            field_dict["error_description"] = error_description
 
         return field_dict
 
@@ -47,11 +47,11 @@ class RestErrorResponse:
         d = dict(src_dict)
         error = d.pop("error")
 
-        message = d.pop("message", UNSET)
+        error_description = d.pop("error_description", UNSET)
 
         rest_error_response = cls(
             error=error,
-            message=message,
+            error_description=error_description,
         )
 
         rest_error_response.additional_properties = d

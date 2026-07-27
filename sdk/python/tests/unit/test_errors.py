@@ -144,6 +144,45 @@ class TestClassifyAPI:
         assert isinstance(err, errors.InvalidRequest)
         assert err.body == "bad payload"
 
+    def test_400_invalid_item_maps_to_invalid_item_error(self):
+        resp = _response(
+            400,
+            json_body={
+                "error": "invalid_item",
+                "item_index": 3,
+                "item_error": "invalid email format",
+            },
+        )
+        err = errors.classify_http_error(resp, "api")
+        assert isinstance(err, errors.InvalidItemError)
+        assert isinstance(err, errors.InvalidRequest)
+        assert err.item_index == 3
+        assert err.item_error == "invalid email format"
+        assert err.code == "INVALID_ITEM"
+
+    def test_400_plain_json_falls_back_to_invalid_request(self):
+        resp = _response(400, json_body={"error": "bad_request", "message": "no"})
+        err = errors.classify_http_error(resp, "api")
+        assert isinstance(err, errors.InvalidRequest)
+        assert not isinstance(err, errors.InvalidItemError)
+
+    def test_400_invalid_item_missing_fields_degrades_to_invalid_request(self):
+        resp = _response(400, json_body={"error": "invalid_item", "item_index": 3})
+        err = errors.classify_http_error(resp, "api")
+        assert type(err) is errors.InvalidRequest
+
+    def test_400_invalid_item_bool_index_degrades_to_invalid_request(self):
+        resp = _response(
+            400,
+            json_body={
+                "error": "invalid_item",
+                "item_index": True,
+                "item_error": "invalid email format",
+            },
+        )
+        err = errors.classify_http_error(resp, "api")
+        assert type(err) is errors.InvalidRequest
+
     def test_401_maps_to_token_expired(self):
         resp = _response(401, text="unauth")
         err = errors.classify_http_error(resp, "api")
@@ -262,6 +301,15 @@ class TestPickleRoundTrip:
         original = errors.ServerError(500, "boom")
         restored = pickle.loads(pickle.dumps(original))
         assert type(restored) is errors.ServerError
+
+    def test_invalid_item_error_round_trips(self):
+        original = errors.InvalidItemError(400, '{"error":"invalid_item"}', 3, "invalid email format")
+        restored = pickle.loads(pickle.dumps(original))
+        assert type(restored) is errors.InvalidItemError
+        assert restored.http_status == 400
+        assert restored.item_index == 3
+        assert restored.item_error == "invalid email format"
+        assert str(restored) == str(original)
 
     def test_auth_rate_limited_roundtrips(self):
         original = errors.AuthRateLimited(429, "too_many_requests", "Slow down", 12.5)

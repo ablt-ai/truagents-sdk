@@ -5,6 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.invalid_item_error import InvalidItemError
 from ...models.phone_unsubscribe_batch_request import PhoneUnsubscribeBatchRequest
 from ...models.phone_unsubscribe_batch_response import PhoneUnsubscribeBatchResponse
 from ...models.rest_error_response import RestErrorResponse
@@ -20,7 +21,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/api/v1/unsubscribe/phone",
+        "url": "/api/v1/unsubscribe/phone/add",
     }
 
     _kwargs["json"] = body.to_dict()
@@ -34,7 +35,9 @@ def _get_kwargs(
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> (
-    PhoneUnsubscribeBatchResponse
+    InvalidItemError
+    | RestErrorResponse
+    | PhoneUnsubscribeBatchResponse
     | RestErrorResponse
     | UnauthorizedOrganizationError
     | None
@@ -45,7 +48,23 @@ def _parse_response(
         return response_200
 
     if response.status_code == 400:
-        response_400 = RestErrorResponse.from_dict(response.json())
+
+        def _parse_response_400(data: object) -> InvalidItemError | RestErrorResponse:
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                response_400_type_0 = InvalidItemError.from_dict(data)
+
+                return response_400_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            if not isinstance(data, dict):
+                raise TypeError()
+            response_400_type_1 = RestErrorResponse.from_dict(data)
+
+            return response_400_type_1
+
+        response_400 = _parse_response_400(response.json())
 
         return response_400
 
@@ -58,11 +77,6 @@ def _parse_response(
         response_403 = UnauthorizedOrganizationError.from_dict(response.json())
 
         return response_403
-
-    if response.status_code == 422:
-        response_422 = PhoneUnsubscribeBatchResponse.from_dict(response.json())
-
-        return response_422
 
     if response.status_code == 429:
         response_429 = RestErrorResponse.from_dict(response.json())
@@ -78,7 +92,11 @@ def _parse_response(
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[
-    PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+    InvalidItemError
+    | RestErrorResponse
+    | PhoneUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
 ]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -93,25 +111,30 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
 ) -> Response[
-    PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+    InvalidItemError
+    | RestErrorResponse
+    | PhoneUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
 ]:
-    """Push voice (phone call) opt-out / opt-in changes
+    """Opt identifiers out (phone)
 
-     Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in
-    `org_slug` (top-level body field) or the `client_id`'s default organization when omitted. Items are
-    processed in array order; per-item failures do NOT roll back accepted items. Up to 10,000 items per
-    request. Idempotent. Rate limited to 60 requests per minute per `client_id`.
+     Writes a batch of voice opt-out / opt-in records, opting each identifier out of the targeted group.
+    The URL verb supplies the direction; request bodies carry no direction field. The batch is all-or-
+    nothing: validated as a whole before anything is written; any invalid item returns `400
+    invalid_item` with zero rows persisted. Target via `group_id` or `org_slug` (at most one), or omit
+    both for the key's default organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
         body (PhoneUnsubscribeBatchRequest):  Example: {'org_slug': 'acme-corp', 'items':
-            [{'phone': '+15551234567', 'unsubscribed': True}]}.
+            [{'phone': '+15551234567'}]}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]
+        Response[InvalidItemError | RestErrorResponse | PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]
     """
 
     kwargs = _get_kwargs(
@@ -130,28 +153,31 @@ def sync(
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
 ) -> (
-    PhoneUnsubscribeBatchResponse
+    InvalidItemError
+    | RestErrorResponse
+    | PhoneUnsubscribeBatchResponse
     | RestErrorResponse
     | UnauthorizedOrganizationError
     | None
 ):
-    """Push voice (phone call) opt-out / opt-in changes
+    """Opt identifiers out (phone)
 
-     Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in
-    `org_slug` (top-level body field) or the `client_id`'s default organization when omitted. Items are
-    processed in array order; per-item failures do NOT roll back accepted items. Up to 10,000 items per
-    request. Idempotent. Rate limited to 60 requests per minute per `client_id`.
+     Writes a batch of voice opt-out / opt-in records, opting each identifier out of the targeted group.
+    The URL verb supplies the direction; request bodies carry no direction field. The batch is all-or-
+    nothing: validated as a whole before anything is written; any invalid item returns `400
+    invalid_item` with zero rows persisted. Target via `group_id` or `org_slug` (at most one), or omit
+    both for the key's default organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
         body (PhoneUnsubscribeBatchRequest):  Example: {'org_slug': 'acme-corp', 'items':
-            [{'phone': '+15551234567', 'unsubscribed': True}]}.
+            [{'phone': '+15551234567'}]}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+        InvalidItemError | RestErrorResponse | PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
     """
 
     return sync_detailed(
@@ -165,25 +191,30 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
 ) -> Response[
-    PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+    InvalidItemError
+    | RestErrorResponse
+    | PhoneUnsubscribeBatchResponse
+    | RestErrorResponse
+    | UnauthorizedOrganizationError
 ]:
-    """Push voice (phone call) opt-out / opt-in changes
+    """Opt identifiers out (phone)
 
-     Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in
-    `org_slug` (top-level body field) or the `client_id`'s default organization when omitted. Items are
-    processed in array order; per-item failures do NOT roll back accepted items. Up to 10,000 items per
-    request. Idempotent. Rate limited to 60 requests per minute per `client_id`.
+     Writes a batch of voice opt-out / opt-in records, opting each identifier out of the targeted group.
+    The URL verb supplies the direction; request bodies carry no direction field. The batch is all-or-
+    nothing: validated as a whole before anything is written; any invalid item returns `400
+    invalid_item` with zero rows persisted. Target via `group_id` or `org_slug` (at most one), or omit
+    both for the key's default organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
         body (PhoneUnsubscribeBatchRequest):  Example: {'org_slug': 'acme-corp', 'items':
-            [{'phone': '+15551234567', 'unsubscribed': True}]}.
+            [{'phone': '+15551234567'}]}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]
+        Response[InvalidItemError | RestErrorResponse | PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError]
     """
 
     kwargs = _get_kwargs(
@@ -200,28 +231,31 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     body: PhoneUnsubscribeBatchRequest,
 ) -> (
-    PhoneUnsubscribeBatchResponse
+    InvalidItemError
+    | RestErrorResponse
+    | PhoneUnsubscribeBatchResponse
     | RestErrorResponse
     | UnauthorizedOrganizationError
     | None
 ):
-    """Push voice (phone call) opt-out / opt-in changes
+    """Opt identifiers out (phone)
 
-     Apply a batch of `{ phone, unsubscribed }` state changes to one organization — the value supplied in
-    `org_slug` (top-level body field) or the `client_id`'s default organization when omitted. Items are
-    processed in array order; per-item failures do NOT roll back accepted items. Up to 10,000 items per
-    request. Idempotent. Rate limited to 60 requests per minute per `client_id`.
+     Writes a batch of voice opt-out / opt-in records, opting each identifier out of the targeted group.
+    The URL verb supplies the direction; request bodies carry no direction field. The batch is all-or-
+    nothing: validated as a whole before anything is written; any invalid item returns `400
+    invalid_item` with zero rows persisted. Target via `group_id` or `org_slug` (at most one), or omit
+    both for the key's default organization. Rate limited to 60 requests per minute per `client_id`.
 
     Args:
         body (PhoneUnsubscribeBatchRequest):  Example: {'org_slug': 'acme-corp', 'items':
-            [{'phone': '+15551234567', 'unsubscribed': True}]}.
+            [{'phone': '+15551234567'}]}.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
+        InvalidItemError | RestErrorResponse | PhoneUnsubscribeBatchResponse | RestErrorResponse | UnauthorizedOrganizationError
     """
 
     return (

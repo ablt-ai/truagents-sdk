@@ -15,7 +15,8 @@ class PhoneUnsubscribeUpdatedEntry:
     """
     Attributes:
         phone (str): Echoed from the input item. Example: +15551234567.
-        unsubscribed (bool): Echoed from the input item.
+        unsubscribed (bool): Derived from the endpoint verb — `true` on `/add`, `false` on `/remove`. Not echoed from
+            request input; write items carry only the identifier.
         updated_at (datetime.datetime): Row's current state-change timestamp. Compare against a previously-observed
             value for the same identifier to distinguish a real state change from an idempotent no-op.
     """

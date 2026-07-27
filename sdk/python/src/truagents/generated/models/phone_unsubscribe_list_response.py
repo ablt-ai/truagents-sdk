@@ -17,26 +17,26 @@ T = TypeVar("T", bound="PhoneUnsubscribeListResponse")
 class PhoneUnsubscribeListResponse:
     """
     Example:
-        {'org_slug': 'acme-corp', 'data': [{'phone': '+15551234567', 'unsubscribed': True, 'source': 'user_action',
+        {'group_id': 'ug_ckxyz123', 'data': [{'phone': '+15551234567', 'unsubscribed': True, 'source': 'user_action',
             'updated_at': '2026-04-12T16:22:01Z'}], 'next_cursor': None, 'has_more': False}
 
     Attributes:
-        org_slug (str): Organization this page belongs to — the value you supplied, the one carried by `cursor`, or your
-            key's default organization when neither was provided. Example: acme-corp.
+        group_id (str): Group this page belongs to — the one you targeted, or the one your `org_slug` / default
+            organization resolved to. Example: ug_ckxyz123.
         data (list[PhoneUnsubscribeRecord]):
         next_cursor (None | str): Pass to the `cursor` query parameter to fetch the next page. `null` when no more
             results are available. See the `Cursor` parameter for the encoding contract.
         has_more (bool):
     """
 
-    org_slug: str
+    group_id: str
     data: list[PhoneUnsubscribeRecord]
     next_cursor: None | str
     has_more: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        org_slug = self.org_slug
+        group_id = self.group_id
 
         data = []
         for data_item_data in self.data:
@@ -52,7 +52,7 @@ class PhoneUnsubscribeListResponse:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "org_slug": org_slug,
+                "group_id": group_id,
                 "data": data,
                 "next_cursor": next_cursor,
                 "has_more": has_more,
@@ -66,7 +66,7 @@ class PhoneUnsubscribeListResponse:
         from ..models.phone_unsubscribe_record import PhoneUnsubscribeRecord
 
         d = dict(src_dict)
-        org_slug = d.pop("org_slug")
+        group_id = d.pop("group_id")
 
         data = []
         _data = d.pop("data")
@@ -85,7 +85,7 @@ class PhoneUnsubscribeListResponse:
         has_more = d.pop("has_more")
 
         phone_unsubscribe_list_response = cls(
-            org_slug=org_slug,
+            group_id=group_id,
             data=data,
             next_cursor=next_cursor,
             has_more=has_more,
