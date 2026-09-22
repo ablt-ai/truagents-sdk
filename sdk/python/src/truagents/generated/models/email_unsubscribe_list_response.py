@@ -65,7 +65,9 @@ class EmailUnsubscribeListResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.email_unsubscribe_record import EmailUnsubscribeRecord
+        from ..models.email_unsubscribe_record import (
+            EmailUnsubscribeRecord,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         group_id = d.pop("group_id")

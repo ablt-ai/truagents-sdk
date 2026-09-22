@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OAuthRefreshTokenRequestGrantType(str, Enum):
+class OAuthRefreshTokenRequestGrantType(StrEnum):
     REFRESH_TOKEN = "refresh_token"
 
     def __str__(self) -> str:

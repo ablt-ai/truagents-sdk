@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UnsubscribeGroupUsedByEntryChannelsItem(str, Enum):
+class UnsubscribeGroupUsedByEntryChannelsItem(StrEnum):
     EMAIL = "email"
     PHONE = "phone"
     SMS = "sms"

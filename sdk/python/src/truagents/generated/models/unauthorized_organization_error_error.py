@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UnauthorizedOrganizationErrorError(str, Enum):
+class UnauthorizedOrganizationErrorError(StrEnum):
     UNAUTHORIZED_ORGANIZATION = "unauthorized_organization"
 
     def __str__(self) -> str:

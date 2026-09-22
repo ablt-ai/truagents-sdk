@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OAuthErrorResponseError(str, Enum):
+class OAuthErrorResponseError(StrEnum):
     INVALID_CLIENT = "invalid_client"
     INVALID_GRANT = "invalid_grant"
     INVALID_REQUEST = "invalid_request"

@@ -48,7 +48,7 @@ class UnsubscribeGroupsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.unsubscribe_group import UnsubscribeGroup
+        from ..models.unsubscribe_group import UnsubscribeGroup  # noqa: PLC0415
 
         d = dict(src_dict)
         data = []

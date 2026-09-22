@@ -79,7 +79,9 @@ class UnsubscribeGroup:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.unsubscribe_group_used_by_entry import UnsubscribeGroupUsedByEntry
+        from ..models.unsubscribe_group_used_by_entry import (
+            UnsubscribeGroupUsedByEntry,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         id = d.pop("id")

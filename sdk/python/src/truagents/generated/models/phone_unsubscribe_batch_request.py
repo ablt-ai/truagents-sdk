@@ -62,7 +62,9 @@ class PhoneUnsubscribeBatchRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.phone_unsubscribe_item import PhoneUnsubscribeItem
+        from ..models.phone_unsubscribe_item import (
+            PhoneUnsubscribeItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         items = []

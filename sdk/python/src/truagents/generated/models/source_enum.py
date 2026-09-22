@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class SourceEnum(str, Enum):
+class SourceEnum(StrEnum):
     ADMIN = "admin"
     API = "api"
     IMPORT = "import"
