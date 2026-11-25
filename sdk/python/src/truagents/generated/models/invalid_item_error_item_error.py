@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class InvalidItemErrorItemError(str, Enum):
+class InvalidItemErrorItemError(StrEnum):
     DUPLICATE_IDENTIFIER = "duplicate identifier"
     INVALID_EMAIL_FORMAT = "invalid email format"
     INVALID_PHONE_FORMAT = "invalid phone format"

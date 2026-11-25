@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UnsubscribeGroupKind(str, Enum):
+class UnsubscribeGroupKind(StrEnum):
     EMAIL = "email"
     PHONE_NUMBER = "phone_number"
 

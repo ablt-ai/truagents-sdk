@@ -59,7 +59,7 @@ class PhoneUnsubscribeBatchResponse:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.phone_unsubscribe_updated_entry import (
             PhoneUnsubscribeUpdatedEntry,
-        )
+        )  # noqa: PLC0415
 
         d = dict(src_dict)
         group_id = d.pop("group_id")
